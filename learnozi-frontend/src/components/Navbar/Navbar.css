@@ -1,0 +1,74 @@
+/* ===== Navbar ===== */
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 64px;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+
+.navbar-logo-icon {
+  width: 34px;
+  height: 34px;
+  background: var(--color-primary);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.navbar-logo-text {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  list-style: none;
+}
+
+.navbar-nav a {
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  transition: all var(--transition);
+}
+.navbar-nav a:hover,
+.navbar-nav a.active {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbar-user {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  padding-right: 0.5rem;
+}
