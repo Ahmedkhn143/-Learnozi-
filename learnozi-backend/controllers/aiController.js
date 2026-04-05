@@ -1,39 +1,22 @@
-const axios = require('axios');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Conversation = require('../models/Conversation');
 const config = require('../config');
 
-// ─── OpenAI client helper ────────────────────────────────
-
-const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
-
-async function callOpenAI(messages, { maxTokens = 1024, temperature = 0.7 } = {}) {
-  if (!config.openai.apiKey) {
-    throw Object.assign(new Error('OpenAI API key not configured'), { statusCode: 503 });
+// Gemini client helper
+function getModel() {
+  if (!config.gemini.apiKey) {
+    throw Object.assign(new Error('Gemini API key not configured'), { statusCode: 503 });
   }
-
-  const { data } = await axios.post(
-    OPENAI_URL,
-    {
-      model: 'gpt-3.5-turbo',
-      messages,
-      max_tokens: maxTokens,
-      temperature,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${config.openai.apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      timeout: 30000,
-    }
-  );
-
-  return data.choices[0].message.content;
+  const genAI = new GoogleGenerativeAI(config.gemini.apiKey);
+  return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 }
 
-// ─── Structured JSON helpers ─────────────────────────────
+// Structured JSON system prompt
+const STRUCTURED_SYSTEM_PROMPT = `You are Learnozi AI, a friendly expert tutor for Pakistani students.
+You can explain in both English and Urdu depending on what the student writes.
+If the student writes in Urdu or asks for Urdu, respond in Urdu (Roman Urdu or script).
+If the student writes in English, respond in English.
 
-const STRUCTURED_SYSTEM_PROMPT = `You are Learnozi AI, a friendly expert tutor.
 When given a topic, respond with ONLY valid JSON — no markdown, no code fences.
 Use this exact schema:
 {
@@ -43,78 +26,66 @@ Use this exact schema:
 }`;
 
 function parseStructuredResponse(raw) {
-  // Strip markdown code fences if the model wraps its answer
   const cleaned = raw.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '').trim();
-
   try {
     const parsed = JSON.parse(cleaned);
-
-    // Validate required keys exist and are strings
     const keys = ['explanation', 'example', 'summary'];
     for (const key of keys) {
       if (typeof parsed[key] !== 'string' || !parsed[key].trim()) {
         throw new Error(`Missing or empty field: ${key}`);
       }
     }
-
     return {
       explanation: parsed.explanation.trim(),
       example: parsed.example.trim(),
       summary: parsed.summary.trim(),
     };
   } catch {
-    // Graceful fallback — return the raw text as the explanation
-    return {
-      explanation: raw.trim(),
-      example: '',
-      summary: '',
-    };
+    return { explanation: raw.trim(), example: '', summary: '' };
   }
 }
 
-// ─── POST /api/ai/explain ────────────────────────────────
-// Input body:  { topic: string, level?: string }
-// Output JSON: { explanation, example, summary, conversationId }
-
+// POST /api/ai/explain
 exports.explain = async (req, res, next) => {
   try {
-    const { topic, level } = req.body;
+    const { topic, level, language } = req.body;
 
     if (!topic || !topic.trim()) {
       return res.status(400).json({ error: 'topic is required' });
     }
 
-    const raw = await callOpenAI(
-      [
-        {
-          role: 'system',
-          content: `${STRUCTURED_SYSTEM_PROMPT}\nAdjust complexity for a ${level || 'intermediate'}-level student.`,
-        },
-        { role: 'user', content: topic.trim() },
-      ],
-      { maxTokens: 1024, temperature: 0.6 }
-    );
+    const model = getModel();
 
-    const result = parseStructuredResponse(raw);
+    const systemInstruction = `${STRUCTURED_SYSTEM_PROMPT}
+Adjust complexity for a ${level || 'intermediate'}-level student.
+${language === 'urdu' ? 'Respond in Urdu language.' : ''}`;
 
-    // Persist as conversation for history
+    const result = await model.generateContent({
+      systemInstruction,
+      contents: [{ role: 'user', parts: [{ text: topic.trim() }] }],
+      generationConfig: { temperature: 0.6, maxOutputTokens: 1024 },
+    });
+
+    const raw = result.response.text();
+    const parsed = parseStructuredResponse(raw);
+
     const conversation = await Conversation.create({
       user: req.user._id,
       topic: topic.trim().substring(0, 120),
       subject: 'General',
       messages: [
         { role: 'user', content: topic.trim() },
-        { role: 'assistant', content: JSON.stringify(result) },
+        { role: 'assistant', content: JSON.stringify(parsed) },
       ],
     });
 
-    res.json({ ...result, conversationId: conversation._id });
+    res.json({ ...parsed, conversationId: conversation._id });
   } catch (error) {
     next(error);
   }
 };
 
-// POST /api/ai/chat — continue a conversation
+// POST /api/ai/chat
 exports.chat = async (req, res, next) => {
   try {
     const { message, conversationId, subject } = req.body;
@@ -125,10 +96,7 @@ exports.chat = async (req, res, next) => {
 
     let conversation;
     if (conversationId) {
-      conversation = await Conversation.findOne({
-        _id: conversationId,
-        user: req.user._id,
-      });
+      conversation = await Conversation.findOne({ _id: conversationId, user: req.user._id });
       if (!conversation) return res.status(404).json({ error: 'Conversation not found' });
     } else {
       conversation = await Conversation.create({
@@ -141,19 +109,27 @@ exports.chat = async (req, res, next) => {
 
     conversation.messages.push({ role: 'user', content: message });
 
-    // Build context for OpenAI (system + last 10 messages)
-    const aiMessages = [
-      {
-        role: 'system',
-        content: `You are Learnozi AI, a friendly expert tutor specializing in ${conversation.subject}. Help students understand concepts clearly. Be encouraging but accurate.`,
-      },
-      ...conversation.messages.slice(-10).map((m) => ({
-        role: m.role === 'assistant' ? 'assistant' : 'user',
-        content: m.content,
-      })),
-    ];
+    const model = getModel();
 
-    const reply = await callOpenAI(aiMessages);
+    // Build Gemini history — 'assistant' becomes 'model' in Gemini
+    const history = conversation.messages
+      .slice(-10, -1)
+      .map((m) => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }],
+      }));
+
+    const chat = model.startChat({
+      systemInstruction: `You are Learnozi AI, a friendly expert tutor for Pakistani students specializing in ${conversation.subject || 'general studies'}.
+Help students understand concepts clearly.
+If the student writes in Urdu, reply in Urdu. If in English, reply in English.
+Be encouraging, accurate, and concise.`,
+      history,
+      generationConfig: { temperature: 0.7, maxOutputTokens: 1024 },
+    });
+
+    const result = await chat.sendMessage(message);
+    const reply = result.response.text();
 
     conversation.messages.push({ role: 'assistant', content: reply });
     await conversation.save();
@@ -164,7 +140,7 @@ exports.chat = async (req, res, next) => {
   }
 };
 
-// GET /api/ai/conversations — list user's conversations (paginated)
+// GET /api/ai/conversations
 exports.getConversations = async (req, res, next) => {
   try {
     const page = Math.max(1, parseInt(req.query.page) || 1);
@@ -198,10 +174,7 @@ exports.getConversations = async (req, res, next) => {
 // GET /api/ai/conversations/:id
 exports.getConversation = async (req, res, next) => {
   try {
-    const conversation = await Conversation.findOne({
-      _id: req.params.id,
-      user: req.user._id,
-    });
+    const conversation = await Conversation.findOne({ _id: req.params.id, user: req.user._id });
     if (!conversation) return res.status(404).json({ error: 'Conversation not found' });
     res.json({ conversation });
   } catch (error) {

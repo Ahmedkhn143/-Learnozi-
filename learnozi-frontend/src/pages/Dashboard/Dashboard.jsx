@@ -1,21 +1,123 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
 import './Dashboard.css';
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const authHeaders = () => {
+  const t = localStorage.getItem('token');
+  return t ? { Authorization: `Bearer ${t}` } : {};
+};
+
+function fmtMin(min) {
+  if (!min) return '0m';
+  if (min < 60) return `${min}m`;
+  return `${Math.floor(min / 60)}h ${min % 60 > 0 ? `${min % 60}m` : ''}`.trim();
+}
+
+function timeAgo(dateStr) {
+  const diff = (Date.now() - new Date(dateStr)) / 1000;
+  if (diff < 60)   return 'Just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
 export default function Dashboard() {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState({
+    focusStats: null,
+    activePlans: 0,
+    aiConversations: 0,
+    flashcardSets: 0,
+    recentSessions: [],
+    recentConvos: [],
+  });
+
+  useEffect(() => {
+    loadAll();
+  }, []);
+
+  const loadAll = async () => {
+    setLoading(true);
+    try {
+      const headers = authHeaders();
+      const [focusRes, plansRes, aiRes, fcRes, historyRes] = await Promise.allSettled([
+        axios.get(`${API}/api/focus/stats`,             { headers }),
+        axios.get(`${API}/api/plans?limit=50`,           { headers }),
+        axios.get(`${API}/api/ai/conversations?limit=5`, { headers }),
+        axios.get(`${API}/api/flashcards`,               { headers }),
+        axios.get(`${API}/api/focus/history?limit=3`,    { headers }),
+      ]);
+
+      const focusStats      = focusRes.status      === 'fulfilled' ? focusRes.value.data        : null;
+      const plansData       = plansRes.status      === 'fulfilled' ? plansRes.value.data        : null;
+      const aiData          = aiRes.status         === 'fulfilled' ? aiRes.value.data           : null;
+      const fcData          = fcRes.status         === 'fulfilled' ? fcRes.value.data           : null;
+      const historyData     = historyRes.status    === 'fulfilled' ? historyRes.value.data      : null;
+
+      const activePlans = plansData?.plans?.filter((p) => p.status === 'active').length ?? 0;
+
+      setData({
+        focusStats,
+        activePlans,
+        aiConversations: aiData?.total ?? 0,
+        flashcardSets:   fcData?.sets?.length ?? 0,
+        recentSessions:  historyData?.sessions ?? [],
+        recentConvos:    aiData?.conversations ?? [],
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const firstName = user?.name?.split(' ')[0] || 'Student';
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+  // Build recent activity from sessions + convos merged
+  const activity = [
+    ...data.recentSessions.map((s) => ({
+      type: 'focus',
+      label: `Focus Session — ${s.subject}`,
+      meta: `${s.durationMin} min`,
+      time: s.completedAt,
+      dot: 'green',
+    })),
+    ...data.recentConvos.map((c) => ({
+      type: 'ai',
+      label: `AI: ${c.topic}`,
+      meta: 'AI Explainer',
+      time: c.updatedAt,
+      dot: 'purple',
+    })),
+  ]
+    .sort((a, b) => new Date(b.time) - new Date(a.time))
+    .slice(0, 5);
+
   return (
     <div className="dashboard">
       {/* Header */}
       <div className="page-header">
-        <h1>Welcome back, Student 👋</h1>
+        <h1>{greeting}, {firstName} 👋</h1>
         <p>Here's your study overview for this week.</p>
       </div>
+
+      {/* Streak banner */}
+      {data.focusStats?.streak > 0 && (
+        <div className="dash-streak-banner">
+          🔥 <strong>{data.focusStats.streak} din ki streak!</strong> — Aaj bhi padhna mat bhoolo
+        </div>
+      )}
 
       {/* Stat cards */}
       <div className="dashboard-stats">
         <div className="card stat-card">
           <div className="stat-icon purple">📚</div>
           <div className="stat-info">
-            <h3>3</h3>
+            <h3>{loading ? '—' : data.activePlans}</h3>
             <p>Active Plans</p>
           </div>
         </div>
@@ -23,7 +125,7 @@ export default function Dashboard() {
         <div className="card stat-card">
           <div className="stat-icon green">⏱️</div>
           <div className="stat-info">
-            <h3>12h 30m</h3>
+            <h3>{loading ? '—' : fmtMin(data.focusStats?.weekMinutes)}</h3>
             <p>Focus Time (7 days)</p>
           </div>
         </div>
@@ -31,8 +133,16 @@ export default function Dashboard() {
         <div className="card stat-card">
           <div className="stat-icon amber">🧠</div>
           <div className="stat-info">
-            <h3>24</h3>
+            <h3>{loading ? '—' : data.aiConversations}</h3>
             <p>Concepts Explored</p>
+          </div>
+        </div>
+
+        <div className="card stat-card">
+          <div className="stat-icon blue">🃏</div>
+          <div className="stat-info">
+            <h3>{loading ? '—' : data.flashcardSets}</h3>
+            <p>Flashcard Sets</p>
           </div>
         </div>
       </div>
@@ -42,11 +152,10 @@ export default function Dashboard() {
         <Link to="/planner" className="card card-clickable action-card">
           <div className="action-left">
             <span className="action-emoji">📅</span>
-            <span className="action-label">New Study Plan</span>
+            <span className="action-label">Study Planner</span>
           </div>
           <span className="action-arrow">→</span>
         </Link>
-
         <Link to="/ai-explainer" className="card card-clickable action-card">
           <div className="action-left">
             <span className="action-emoji">🤖</span>
@@ -54,11 +163,17 @@ export default function Dashboard() {
           </div>
           <span className="action-arrow">→</span>
         </Link>
-
-        <Link to="/planner" className="card card-clickable action-card">
+        <Link to="/timer" className="card card-clickable action-card">
           <div className="action-left">
-            <span className="action-emoji">🎯</span>
-            <span className="action-label">Start Focus Session</span>
+            <span className="action-emoji">⏱️</span>
+            <span className="action-label">Start Focus Timer</span>
+          </div>
+          <span className="action-arrow">→</span>
+        </Link>
+        <Link to="/flashcards" className="card card-clickable action-card">
+          <div className="action-left">
+            <span className="action-emoji">🃏</span>
+            <span className="action-label">Review Flashcards</span>
           </div>
           <span className="action-arrow">→</span>
         </Link>
@@ -67,41 +182,46 @@ export default function Dashboard() {
       {/* Recent activity */}
       <div className="dashboard-recent">
         <h2 className="section-title">Recent Activity</h2>
-        <div className="recent-list">
-          <div className="recent-item">
-            <div className="recent-item-left">
-              <div className="recent-dot green" />
-              <div className="recent-text">
-                <strong>Completed: Photosynthesis Chapter</strong>
-                <span>Biology • Study Plan</span>
-              </div>
-            </div>
-            <span className="recent-time">2h ago</span>
+        {loading ? (
+          <div className="dash-loading">Loading...</div>
+        ) : activity.length === 0 ? (
+          <div className="dash-empty">
+            <p>Koi activity nahi abhi — koi feature use karo!</p>
+            <Link to="/ai-explainer" className="dash-empty-link">AI Explainer try karo →</Link>
           </div>
-
-          <div className="recent-item">
-            <div className="recent-item-left">
-              <div className="recent-dot purple" />
-              <div className="recent-text">
-                <strong>AI Explanation: Newton's 3rd Law</strong>
-                <span>Physics • AI Explainer</span>
+        ) : (
+          <div className="recent-list">
+            {activity.map((a, i) => (
+              <div key={i} className="recent-item">
+                <div className="recent-item-left">
+                  <div className={`recent-dot ${a.dot}`} />
+                  <div className="recent-text">
+                    <strong>{a.label}</strong>
+                    <span>{a.meta}</span>
+                  </div>
+                </div>
+                <span className="recent-time">{timeAgo(a.time)}</span>
               </div>
-            </div>
-            <span className="recent-time">5h ago</span>
+            ))}
           </div>
+        )}
+      </div>
 
-          <div className="recent-item">
-            <div className="recent-item-left">
-              <div className="recent-dot amber" />
-              <div className="recent-text">
-                <strong>Focus Session: 45 min</strong>
-                <span>Mathematics • Focus Timer</span>
-              </div>
+      {/* Today's focus */}
+      {data.focusStats?.todayMinutes > 0 && (
+        <div className="dash-today">
+          <div className="dash-today-label">Aaj ka focus time</div>
+          <div className="dash-today-bar-wrap">
+            <div className="dash-today-bar">
+              <div
+                className="dash-today-fill"
+                style={{ width: `${Math.min(100, (data.focusStats.todayMinutes / 120) * 100)}%` }}
+              />
             </div>
-            <span className="recent-time">Yesterday</span>
+            <span className="dash-today-num">{fmtMin(data.focusStats.todayMinutes)} / 2h goal</span>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

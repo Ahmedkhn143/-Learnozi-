@@ -73,3 +73,31 @@
   font-size: 0.875rem;
   margin-bottom: 0.5rem;
 }
+
+/* Validation */
+.input-error {
+  border-color: var(--color-danger) !important;
+  background: #fef2f2 !important;
+}
+.input-error:focus {
+  border-color: var(--color-danger) !important;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.1) !important;
+}
+.field-error {
+  display: block; font-size: 0.75rem;
+  color: var(--color-danger); margin-top: 4px;
+  font-weight: 500;
+}
+.field-success {
+  display: block; font-size: 0.75rem;
+  color: var(--color-success); margin-top: 4px;
+  font-weight: 500;
+}
+.auth-logo {
+  width: 44px; height: 44px;
+  background: var(--color-primary);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 800; font-size: 1.3rem;
+  text-decoration: none; margin: 0 auto 1rem;
+}

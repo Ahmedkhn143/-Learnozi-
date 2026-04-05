@@ -2,6 +2,13 @@
 
 Learnozi is a full-stack web application built with the **MERN** stack (MongoDB, Express.js, React.js, Node.js). 
 
+## ✨ Key Features
+- **Dashboard & Study Planner**: Organize subjects and schedule exams effortlessly.
+- **AI Explainer**: Get instant AI-powered explanations for tough topics.
+- **Flashcards System [NEW]**: Create, manage, and study custom flashcards to improve memory retention.
+- **Pomodoro / Focus Timer [NEW]**: Built-in study timer to track focus sessions and maximize productivity.
+- **Landing Page & Secure Auth [NEW]**: Polished guest landing page with JWT-based protected routes.
+
 ## 🚀 Technologies Used
 
 ### Frontend (`learnozi-frontend`)

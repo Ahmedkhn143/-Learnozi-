@@ -1,0 +1,175 @@
+/* ===== Pomodoro Timer ===== */
+.pomodoro { max-width: 680px; margin: 0 auto; padding: 2rem 1rem; }
+
+/* Header */
+.pomo-header { text-align: center; margin-bottom: 2rem; }
+.pomo-header h1 { font-size: 1.6rem; font-weight: 700; color: var(--color-text); }
+.pomo-header p  { font-size: 0.9rem; color: var(--color-text-secondary); margin-top: 4px; }
+
+/* Mode tabs */
+.pomo-modes {
+  display: flex; gap: 0.5rem; justify-content: center;
+  margin-bottom: 2rem;
+}
+.pomo-mode-btn {
+  padding: 0.5rem 1.2rem; border-radius: 99px;
+  font-size: 0.85rem; font-weight: 600;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg); color: var(--color-text-secondary);
+  cursor: pointer; transition: all 0.2s;
+}
+.pomo-mode-btn.active {
+  background: var(--color-primary); color: #fff;
+  border-color: var(--color-primary);
+}
+.pomo-mode-btn:hover:not(.active) {
+  border-color: var(--color-primary); color: var(--color-primary);
+}
+
+/* Timer circle */
+.pomo-circle-wrap {
+  display: flex; justify-content: center;
+  margin-bottom: 2rem;
+}
+.pomo-circle {
+  position: relative; width: 240px; height: 240px;
+}
+.pomo-svg { transform: rotate(-90deg); }
+.pomo-track { fill: none; stroke: var(--color-border); stroke-width: 8; }
+.pomo-fill  {
+  fill: none; stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear, stroke 0.4s;
+}
+.pomo-time-text {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.pomo-time {
+  font-size: 3.2rem; font-weight: 700;
+  color: var(--color-text); line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.pomo-mode-label {
+  font-size: 0.8rem; font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-top: 6px; text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.pomo-session-count {
+  font-size: 0.75rem; color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+/* Controls */
+.pomo-controls {
+  display: flex; gap: 0.75rem;
+  justify-content: center; margin-bottom: 1.75rem;
+}
+.pomo-btn-main {
+  width: 120px; height: 48px;
+  border-radius: 99px;
+  font-size: 1rem; font-weight: 700;
+  border: none; cursor: pointer; transition: all 0.2s;
+}
+.pomo-btn-main.start { background: var(--color-primary); color: #fff; }
+.pomo-btn-main.start:hover { background: var(--color-primary-hover); transform: scale(1.04); }
+.pomo-btn-main.pause { background: var(--color-warning, #f59e0b); color: #fff; }
+.pomo-btn-main.pause:hover { opacity: 0.9; }
+.pomo-btn-reset {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--color-bg); border: 1px solid var(--color-border);
+  font-size: 1.1rem; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.pomo-btn-reset:hover { border-color: var(--color-primary); color: var(--color-primary); }
+
+/* Subject selector */
+.pomo-subject-row {
+  display: flex; gap: 0.75rem; justify-content: center;
+  margin-bottom: 2rem;
+}
+.pomo-subject-row select {
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 0.875rem; color: var(--color-text);
+  background: var(--color-bg); outline: none;
+  transition: border-color 0.2s; cursor: pointer;
+}
+.pomo-subject-row select:focus { border-color: var(--color-primary); }
+
+/* Stats cards */
+.pomo-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1rem; margin-bottom: 2rem;
+}
+.pomo-stat {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1rem; text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+.pomo-stat-num {
+  font-size: 1.6rem; font-weight: 700;
+  color: var(--color-primary);
+}
+.pomo-stat-label {
+  font-size: 0.75rem; color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+/* Session history */
+.pomo-history-title {
+  font-size: 0.8rem; font-weight: 600;
+  color: var(--color-text-secondary); text-transform: uppercase;
+  letter-spacing: 0.05em; margin-bottom: 0.75rem;
+}
+.pomo-history-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.pomo-history-item {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 0.875rem;
+}
+.pomo-history-subject { font-weight: 600; color: var(--color-text); }
+.pomo-history-meta { color: var(--color-text-secondary); font-size: 0.8rem; }
+.pomo-history-duration {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  padding: 2px 10px; border-radius: 99px;
+  font-size: 0.78rem; font-weight: 600;
+}
+
+/* Notification toast */
+.pomo-toast {
+  position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  background: var(--color-text); color: #fff;
+  padding: 0.75rem 1.5rem; border-radius: 99px;
+  font-size: 0.9rem; font-weight: 600;
+  z-index: 999; animation: toastIn 0.3s ease;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(16px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Streak badge */
+.pomo-streak {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #fff7ed; border: 1px solid #fed7aa;
+  color: #c2410c; padding: 4px 14px;
+  border-radius: 99px; font-size: 0.82rem; font-weight: 600;
+  margin: 0 auto 1.5rem; display: flex; justify-content: center;
+  width: fit-content; margin: 0 auto 1.5rem;
+}
+
+@media (max-width: 480px) {
+  .pomo-stats { grid-template-columns: repeat(2, 1fr); }
+  .pomo-time  { font-size: 2.6rem; }
+  .pomo-circle { width: 200px; height: 200px; }
+}

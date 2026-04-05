@@ -1,7 +1,8 @@
 const config = require('../config');
 
 const errorHandler = (err, req, res, _next) => {
-  console.error('Error:', err.message);
+  console.error('Error:', err.stack || err.message);
+  require('fs').writeFileSync('/tmp/error.log', err.stack || err.message);
 
   // Mongoose validation
   if (err.name === 'ValidationError') {
