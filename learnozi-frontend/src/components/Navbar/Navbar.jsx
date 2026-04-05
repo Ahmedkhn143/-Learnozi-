@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import './Navbar.css';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { t, language, toggleLanguage } = useLanguage();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -12,11 +14,11 @@ export default function Navbar() {
   const close = () => setMenuOpen(false);
 
   const links = [
-    { to: '/dashboard',    label: 'Dashboard', end: true },
-    { to: '/planner',      label: 'Planner' },
-    { to: '/ai-explainer', label: 'AI Explainer' },
-    { to: '/flashcards',   label: '🃏 Flashcards' },
-    { to: '/timer',        label: '⏱️ Timer' },
+    { to: '/dashboard',    label: t('nav.dashboard'), end: true },
+    { to: '/planner',      label: t('nav.planner') },
+    { to: '/ai-explainer', label: t('nav.ai_explainer') },
+    { to: '/flashcards',   label: `🃏 ${t('nav.flashcards')}` },
+    { to: '/timer',        label: `⏱️ ${t('nav.timer')}` },
   ];
 
   return (
@@ -35,15 +37,21 @@ export default function Navbar() {
       </nav>
 
       <div className="navbar-actions">
+        <button 
+          className="btn btn-ghost" 
+          onClick={toggleLanguage} 
+          style={{ marginRight: '8px', padding: '0.4rem 0.6rem', fontWeight: 'bold' }}>
+          {language === 'en' ? 'UR' : 'EN'}
+        </button>
         {user ? (
           <>
             <span className="navbar-user">👤 {user.name}</span>
-            <button className="btn btn-ghost" onClick={handleLogout}>Log Out</button>
+            <button className="btn btn-ghost" onClick={handleLogout}>{t('nav.logout')}</button>
           </>
         ) : (
           <>
-            <Link to="/login" className="btn btn-ghost">Log In</Link>
-            <Link to="/signup" className="btn btn-primary">Sign Up</Link>
+            <Link to="/login" className="btn btn-ghost">{t('nav.login')}</Link>
+            <Link to="/signup" className="btn btn-primary">{t('nav.signup')}</Link>
           </>
         )}
       </div>
@@ -58,12 +66,15 @@ export default function Navbar() {
             <NavLink key={l.to} to={l.to} end={l.end} onClick={close}>{l.label}</NavLink>
           ))}
           <div className="navbar-mobile-divider" />
+          <button className="btn btn-ghost" onClick={toggleLanguage} style={{ width: '100%', textAlign: 'left', fontWeight: 'bold' }}>
+            Switch Language: {language === 'en' ? 'UR' : 'EN'}
+          </button>
           {user ? (
-            <button className="btn btn-ghost" onClick={() => { handleLogout(); close(); }}>Log Out</button>
+            <button className="btn btn-ghost" onClick={() => { handleLogout(); close(); }}>{t('nav.logout')}</button>
           ) : (
             <>
-              <Link to="/login" className="btn btn-ghost" onClick={close}>Log In</Link>
-              <Link to="/signup" className="btn btn-primary" onClick={close}>Sign Up</Link>
+              <Link to="/login" className="btn btn-ghost" onClick={close}>{t('nav.login')}</Link>
+              <Link to="/signup" className="btn btn-primary" onClick={close}>{t('nav.signup')}</Link>
             </>
           )}
         </div>
