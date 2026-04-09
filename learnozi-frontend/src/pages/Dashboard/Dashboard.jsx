@@ -237,13 +237,23 @@ export default function Dashboard() {
             </div>
             <span className="action-arrow">→</span>
           </Link>
-          <Link to="/timer" className="card card-clickable action-card">
-            <div className="action-left">
-              <span className="action-emoji">⏱️</span>
-              <span className="action-label">Start Focus Timer</span>
-            </div>
-            <span className="action-arrow">→</span>
-          </Link>
+          {user?.academicProfile?.educationLevel === 'University' ? (
+            <Link to="/academics" className="card card-clickable action-card">
+              <div className="action-left">
+                <span className="action-emoji">🎓</span>
+                <span className="action-label">Academic Profile</span>
+              </div>
+              <span className="action-arrow">→</span>
+            </Link>
+          ) : (
+            <Link to="/document-chat" className="card card-clickable action-card">
+              <div className="action-left">
+                <span className="action-emoji">📄</span>
+                <span className="action-label">AI Doc Analyzer</span>
+              </div>
+              <span className="action-arrow">→</span>
+            </Link>
+          )}
           <Link to="/flashcards" className="card card-clickable action-card">
             <div className="action-left">
               <span className="action-emoji">🃏</span>

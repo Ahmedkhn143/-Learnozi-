@@ -1,0 +1,146 @@
+.onboarding-page {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: #f8fafc;
+}
+
+.onboarding-container {
+  width: 100%;
+  max-width: 600px;
+  padding: 3rem;
+  text-align: center;
+}
+
+.onboarding-header h1 {
+  margin-bottom: 0.5rem;
+  color: var(--color-primary);
+}
+
+.onboarding-header p {
+  color: var(--color-text-secondary);
+  margin-bottom: 2rem;
+}
+
+/* Progress bar */
+.onboarding-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
+
+.progress-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  transition: all 0.3s;
+}
+
+.progress-dot.active {
+  background: var(--color-primary);
+  box-shadow: 0 0 10px rgba(79, 70, 229, 0.4);
+}
+
+.progress-line {
+  width: 40px;
+  height: 2px;
+  background: #e2e8f0;
+  margin: 0 8px;
+  transition: all 0.3s;
+}
+
+.progress-line.active {
+  background: var(--color-primary);
+}
+
+/* Level Grid */
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.level-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.level-card:hover {
+  border-color: var(--color-primary);
+  background: #f5f3ff;
+  transform: translateY(-2px);
+}
+
+.level-icon {
+  font-size: 2.5rem;
+}
+
+.level-label {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+/* Form Styles */
+.onboarding-step h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+  float: left;
+  margin-top: -3rem;
+  font-size: 0.9rem;
+}
+
+.btn-block {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.onboarding-summary {
+  background: #f1f5f9;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: left;
+  margin-bottom: 1.5rem;
+}
+
+.onboarding-summary p {
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+/* Animation */
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+  .level-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -39,6 +39,31 @@ const userSchema = new mongoose.Schema(
     // ── Password reset ─────────────────────────────────────
     resetPasswordToken: String,
     resetPasswordTokenExpires: Date,
+
+    // ── Academic Profile ───────────────────────────────────
+    isOnboarded: {
+      type: Boolean,
+      default: false,
+    },
+    academicProfile: {
+      educationLevel: {
+        type: String,
+        enum: ['Matric', 'Intermediate', 'University', 'TestPrep', null],
+        default: null,
+      },
+      fieldOfStudy: {
+        type: String, // e.g., "Pre-Medical", "Computer Science"
+        default: '',
+      },
+      currentYear: {
+        type: String, // e.g., "9th", "Semester 3"
+        default: '',
+      },
+      institution: {
+        type: String,
+        default: '',
+      },
+    },
   },
   { timestamps: true }
 );

@@ -113,8 +113,15 @@ exports.chatDocument = async (req, res, next) => {
     const model = getModel();
 
     // RAG Strategy: Inject the extracted text as the primary brain for the AI
-    const systemPrompt = `You are a helpful university study assistant for Pakistani students.
+    // Personalize based on profile
+    const profile = req.user.academicProfile || {};
+    const profileInfo = req.user.isOnboarded 
+      ? `This student is at the "${profile.educationLevel}" level, studying "${profile.fieldOfStudy}" (${profile.currentYear}).`
+      : "";
+
+    const systemPrompt = `You are a helpful study assistant for Pakistani students.
 Your ONLY source of knowledge for this conversation is the document text provided below.
+${profileInfo} Tailor your explanations to be perfectly understandable for this student's grade level.
 If the student asks a question that is NOT covered in the document text, politely reply: 
 "Main is sawal ka jawab is document ke mutabiq nahi de sakta kyunki ye information is PDF mein maujood nahi hai."
 Do NOT invent answers or use outside knowledge. 

@@ -56,8 +56,14 @@ exports.explain = async (req, res, next) => {
 
     const model = getModel();
 
+    // Personalize prompt based on academic profile
+    const profile = req.user.academicProfile || {};
+    const profileInfo = req.user.isOnboarded 
+      ? `This student is at the "${profile.educationLevel}" level, studying "${profile.fieldOfStudy}" (${profile.currentYear}).`
+      : `This student is at a "${level || 'intermediate'}" level.`;
+
     const systemInstruction = `${STRUCTURED_SYSTEM_PROMPT}
-Adjust complexity for a ${level || 'intermediate'}-level student.
+${profileInfo} Tailor your tone, complexity, and examples exactly for this grade level.
 ${language === 'urdu' ? 'Respond in Urdu language.' : ''}`;
 
     const result = await model.generateContent({
@@ -119,9 +125,15 @@ exports.chat = async (req, res, next) => {
         parts: [{ text: m.content }],
       }));
 
+    // Personalize based on profile
+    const profile = req.user.academicProfile || {};
+    const profileInfo = req.user.isOnboarded 
+      ? `This student is at the "${profile.educationLevel}" level, studying "${profile.fieldOfStudy}" (${profile.currentYear}).`
+      : "";
+
     const chat = model.startChat({
       systemInstruction: `You are Learnozi AI, a friendly expert tutor for Pakistani students specializing in ${conversation.subject || 'general studies'}.
-Help students understand concepts clearly.
+${profileInfo} Help students understand concepts clearly by tailoring complexity to their grade level.
 If the student writes in Urdu, reply in Urdu. If in English, reply in English.
 Be encouraging, accurate, and concise.`,
       history,

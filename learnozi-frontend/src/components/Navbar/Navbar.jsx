@@ -15,15 +15,18 @@ export default function Navbar() {
 
   const links = [
     { to: '/dashboard',    label: t('nav.dashboard'), end: true },
-    { to: '/academics',    label: '🎓 Academics' },
+    { 
+      to: '/academics',    
+      label: '🎓 Academics',
+      hide: user?.academicProfile?.educationLevel !== 'University'
+    },
     { to: '/planner',      label: t('nav.planner') },
     { to: '/ai-explainer', label: t('nav.ai_explainer') },
     { to: '/document-chat',label: '📄 Doc Chat' },
     { to: '/flashcards',   label: `🃏 ${t('nav.flashcards')}` },
     { to: '/community',    label: '🌍 Community' },
-    { to: '/timer',        label: `⏱️ ${t('nav.timer')}` },
     { to: '/notes',        label: '📝 Notes' },
-  ];
+  ].filter(l => !l.hide);
 
   return (
     <header className="navbar">

@@ -12,6 +12,7 @@ const {
   forgotPassword,
   resetPassword,
   updateProfile,
+  completeOnboarding,
 } = require('../controllers/authController');
 
 // POST /api/auth/register
@@ -33,5 +34,8 @@ router.post('/reset-password/:token', validate(schemas.resetPassword), resetPass
 
 // Profile update (protected)
 router.put('/profile', auth, validate(schemas.updateProfile), updateProfile);
+
+// Onboarding (protected)
+router.post('/onboarding', auth, validate(schemas.completeOnboarding), completeOnboarding);
 
 module.exports = router;

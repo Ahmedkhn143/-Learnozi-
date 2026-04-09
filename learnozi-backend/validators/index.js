@@ -47,6 +47,13 @@ const resendVerification = Joi.object({
   email: Joi.string().trim().lowercase().email().required(),
 });
 
+const completeOnboarding = Joi.object({
+  educationLevel: Joi.string().valid('Matric', 'Intermediate', 'University', 'TestPrep').required(),
+  fieldOfStudy:   Joi.string().trim().max(150).required(),
+  currentYear:    Joi.string().trim().max(50).required(),
+  institution:    Joi.string().trim().max(150).allow('').optional(),
+});
+
 // ═══════════════════════════════════════════════════════════
 // EXAMS
 // ═══════════════════════════════════════════════════════════
@@ -217,6 +224,7 @@ module.exports = {
   resetPassword,
   updateProfile,
   resendVerification,
+  completeOnboarding,
   // Exams
   createExam,
   updateExam,

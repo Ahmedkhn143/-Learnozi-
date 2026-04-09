@@ -19,6 +19,7 @@ import Notes from './pages/Notes/Notes';
 import DocumentChat from './pages/DocumentChat/DocumentChat';
 import Academics from './pages/Academics/Academics';
 import Community from './pages/Community/Community';
+import Onboarding from './pages/Onboarding/Onboarding';
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
 
         {/* Protected pages — logged in users */}
         <Route element={<Layout />}>
+          <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><ErrorBoundary><Dashboard /></ErrorBoundary></ProtectedRoute>} />
           <Route path="/academics" element={<ProtectedRoute><ErrorBoundary><Academics /></ErrorBoundary></ProtectedRoute>} />
           <Route path="/planner"   element={<ProtectedRoute><ErrorBoundary><StudyPlanner /></ErrorBoundary></ProtectedRoute>} />

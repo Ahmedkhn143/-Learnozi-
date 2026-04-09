@@ -258,3 +258,37 @@ exports.updateProfile = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.completeOnboarding = async (req, res, next) => {
+  try {
+    const { educationLevel, fieldOfStudy, currentYear, institution } = req.body;
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    user.academicProfile = {
+      educationLevel,
+      fieldOfStudy,
+      currentYear,
+      institution,
+    };
+    user.isOnboarded = true;
+
+    await user.save();
+
+    res.json({
+      message: 'Onboarding complete!',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        preferences: user.preferences,
+        isVerified: user.isVerified,
+        isOnboarded: user.isOnboarded,
+        academicProfile: user.academicProfile,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
