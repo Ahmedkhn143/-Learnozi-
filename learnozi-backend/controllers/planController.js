@@ -1,5 +1,4 @@
 const StudyPlan = require('../models/StudyPlan');
-const axios = require('axios');
 const config = require('../config');
 
 // GET /api/plans — list all user's plans (paginated)
@@ -52,49 +51,48 @@ exports.create = async (req, res, next) => {
   }
 };
 
-// POST /api/plans/generate — AI-generated plan
+// POST /api/plans/generate — AI-generated plan (via Gemini)
 exports.generateWithAI = async (req, res, next) => {
   try {
     const { title, subjects, examDate, preferences } = req.body;
 
-    if (!config.openai.apiKey) {
-      return res.status(500).json({ error: 'OpenAI API key not configured' });
+    if (!config.gemini?.apiKey) {
+      return res.status(500).json({ error: 'Gemini API key not configured' });
     }
 
-    const response = await axios.post(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        model: 'gpt-3.5-turbo',
-        messages: [
-          {
-            role: 'system',
-            content:
-              'You are a study planning assistant. Generate a detailed study plan as a JSON array of tasks. Each task: { "title": string, "subject": string, "priority": "low"|"medium"|"high"|"urgent", "estimatedMinutes": number, "scheduledDate": "YYYY-MM-DD" }. Respond ONLY with the JSON array.',
-          },
-          {
-            role: 'user',
-            content: `Create a study plan:\n- Subjects: ${JSON.stringify(subjects)}\n- Exam date: ${examDate}\n- Study hours per day: ${req.user.preferences?.studyHoursPerDay || 4}\n- Preferences: ${preferences || 'None'}\n- Start from tomorrow`,
-          },
-        ],
-        max_tokens: 2000,
-        temperature: 0.5,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${config.openai.apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        timeout: 30000,
-      }
-    );
+    const { GoogleGenerativeAI } = require('@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(config.gemini.apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+    const prompt = `You are a study planning assistant for Pakistani students.
+Generate a detailed study plan as a JSON array of tasks.
+
+Each task should follow this schema:
+{ "title": string, "subject": string, "priority": "low"|"medium"|"high"|"urgent", "estimatedMinutes": number, "scheduledDate": "YYYY-MM-DD" }
+
+Respond with ONLY the JSON array — no markdown, no code fences.
+
+Details:
+- Subjects: ${JSON.stringify(subjects)}
+- Exam date: ${examDate}
+- Study hours per day: ${req.user.preferences?.studyHoursPerDay || 4}
+- Preferences: ${preferences || 'None'}
+- Start from tomorrow`;
+
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.5, maxOutputTokens: 2000 },
+    });
+
+    const raw = result.response.text();
 
     let aiTasks = [];
     try {
-      const content = response.data.choices[0].message.content;
-      const jsonMatch = content.match(/\[[\s\S]*\]/);
+      const cleaned = raw.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '').trim();
+      const jsonMatch = cleaned.match(/\[[\s\S]*\]/);
       aiTasks = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
     } catch {
-      console.error('Failed to parse AI response');
+      console.error('Failed to parse AI response for study plan');
     }
 
     const plan = await StudyPlan.create({
