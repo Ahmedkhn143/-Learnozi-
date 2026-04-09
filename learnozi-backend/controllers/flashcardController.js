@@ -97,6 +97,8 @@ exports.getSets = async (req, res, next) => {
       cardCount: s.cards.length,
       progress: s.progress,
       isAIGenerated: s.isAIGenerated,
+      isPublic: s.isPublic,
+      university: s.university,
       createdAt: s.createdAt,
     }));
 
@@ -175,6 +177,71 @@ exports.createSet = async (req, res, next) => {
     });
 
     res.status(201).json({ set });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ── GET /api/public/flashcards ───────────────────────────────
+// Get all public sets globally
+exports.getPublicSets = async (req, res, next) => {
+  try {
+    const { search, university } = req.query;
+    const query = { isPublic: true };
+    if (search) query.title = { $regex: search, $options: 'i' };
+    if (university) query.university = { $regex: university, $options: 'i' };
+
+    const sets = await FlashcardSet.find(query)
+      .populate('user', 'name')
+      .sort({ createdAt: -1 })
+      .limit(50); // Pagination in future
+    
+    res.json({ sets });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ── POST /api/flashcards/:id/clone ───────────────────────────
+// Clone a public set to own account
+exports.cloneSet = async (req, res, next) => {
+  try {
+    const original = await FlashcardSet.findOne({ _id: req.params.id, isPublic: true });
+    if (!original) return res.status(404).json({ error: 'Public set not found' });
+
+    // Ensure users don't clone their own set
+    if (original.user.toString() === req.user._id.toString()) {
+      return res.status(400).json({ error: 'Cannot clone your own set' });
+    }
+
+    const cloned = await FlashcardSet.create({
+      user: req.user._id,
+      title: `${original.title} (Clone)`,
+      subject: original.subject,
+      cards: original.cards.map(c => ({ question: c.question, answer: c.answer, status: 'new' })),
+      isAIGenerated: original.isAIGenerated,
+      isPublic: false, // private by default
+      university: original.university,
+    });
+
+    res.status(201).json({ set: cloned });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ── PATCH /api/flashcards/:id/public ─────────────────────────────
+// Toggle public status and set university
+exports.togglePublic = async (req, res, next) => {
+  try {
+    const { isPublic, university } = req.body;
+    const set = await FlashcardSet.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      { isPublic, university: university || '' },
+      { new: true }
+    );
+    if (!set) return res.status(404).json({ error: 'Set not found' });
+    res.json({ set });
   } catch (error) {
     next(error);
   }

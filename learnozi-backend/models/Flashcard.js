@@ -23,6 +23,8 @@ const flashcardSetSchema = new mongoose.Schema(
     subject: { type: String, default: 'General', trim: true },
     cards:   [cardSchema],
     isAIGenerated: { type: Boolean, default: false },
+    isPublic: { type: Boolean, default: false },
+    university: { type: String, trim: true, default: '' },
   },
   {
     timestamps: true,

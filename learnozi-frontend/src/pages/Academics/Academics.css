@@ -1,0 +1,213 @@
+.academics-page {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.page-header.space-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* CGPA Dashboard */
+.cgpa-dashboard {
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.stat-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat-value {
+  font-size: 3rem;
+  font-weight: 800;
+  color: white !important;
+}
+
+.cgpa-calculator {
+  background: rgba(255,255,255,0.1);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  flex: 1;
+}
+
+.cgpa-calculator h4 {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.calc-input {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.calc-input input {
+  max-width: 150px;
+  background: white;
+  color: #333;
+}
+
+.calc-result {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  background: rgba(0,0,0,0.2);
+  padding: 0.75rem;
+  border-radius: 8px;
+}
+
+/* Semesters */
+.semesters-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.semester-card {
+  padding: 1.5rem;
+}
+
+.semester-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.semester-header h3 {
+  font-size: 1.3rem;
+  color: var(--color-primary);
+  margin-bottom: 0.25rem;
+}
+
+.semester-dates {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+.semester-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.sgpa-badge {
+  background: #f1f5f9;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-weight: 700;
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+/* Courses Table */
+.courses-table-container {
+  overflow-x: auto;
+}
+
+.courses-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.courses-table th, .courses-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.courses-table th {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.courses-table tr:hover {
+  background-color: #f8fafc;
+}
+
+.grade-badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.grade-badge.target {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.grade-select {
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  background: white;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  width: 90%;
+  max-width: 500px;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+  animation: slideIn 0.3s ease-out;
+}
+
+.modal-content h2 {
+  margin-bottom: 1.5rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+  .cgpa-dashboard {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

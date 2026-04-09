@@ -206,6 +206,9 @@ const summarize = Joi.object({
 // EXPORTS
 // ═══════════════════════════════════════════════════════════
 
+const documentSchemas = require('./documentValidators');
+const academicSchemas = require('./academicValidators');
+
 module.exports = {
   // Auth
   register,
@@ -238,4 +241,8 @@ module.exports = {
   explain,
   chat,
   summarize,
+  // Documents
+  ...documentSchemas,
+  // Academics
+  ...academicSchemas,
 };

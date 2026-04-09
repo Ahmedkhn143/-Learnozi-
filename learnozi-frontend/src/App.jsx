@@ -16,6 +16,9 @@ import ForgotPassword from './pages/Auth/ForgotPassword';
 import ResetPassword from './pages/Auth/ResetPassword';
 import Profile from './pages/Profile/Profile';
 import Notes from './pages/Notes/Notes';
+import DocumentChat from './pages/DocumentChat/DocumentChat';
+import Academics from './pages/Academics/Academics';
+import Community from './pages/Community/Community';
 
 export default function App() {
   return (
@@ -36,9 +39,12 @@ export default function App() {
         {/* Protected pages — logged in users */}
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<ProtectedRoute><ErrorBoundary><Dashboard /></ErrorBoundary></ProtectedRoute>} />
+          <Route path="/academics" element={<ProtectedRoute><ErrorBoundary><Academics /></ErrorBoundary></ProtectedRoute>} />
           <Route path="/planner"   element={<ProtectedRoute><ErrorBoundary><StudyPlanner /></ErrorBoundary></ProtectedRoute>} />
           <Route path="/ai-explainer" element={<ProtectedRoute><ErrorBoundary><AiExplainer /></ErrorBoundary></ProtectedRoute>} />
+          <Route path="/document-chat" element={<ProtectedRoute><ErrorBoundary><DocumentChat /></ErrorBoundary></ProtectedRoute>} />
           <Route path="/flashcards" element={<ProtectedRoute><ErrorBoundary><Flashcards /></ErrorBoundary></ProtectedRoute>} />
+          <Route path="/community"  element={<ProtectedRoute><ErrorBoundary><Community /></ErrorBoundary></ProtectedRoute>} />
           <Route path="/timer"     element={<ProtectedRoute><ErrorBoundary><Pomodoro /></ErrorBoundary></ProtectedRoute>} />
           <Route path="/profile"   element={<ProtectedRoute><ErrorBoundary><Profile /></ErrorBoundary></ProtectedRoute>} />
           <Route path="/notes"     element={<ProtectedRoute><ErrorBoundary><Notes /></ErrorBoundary></ProtectedRoute>} />
