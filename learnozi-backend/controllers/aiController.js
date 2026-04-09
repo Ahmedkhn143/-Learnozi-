@@ -8,7 +8,7 @@ function getModel() {
     throw Object.assign(new Error('Gemini API key not configured'), { statusCode: 503 });
   }
   const genAI = new GoogleGenerativeAI(config.gemini.apiKey);
-  return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  return genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 }
 
 // Structured JSON system prompt
@@ -24,6 +24,16 @@ Use this exact schema:
   "example": "A concrete, practical example that illustrates the concept.",
   "summary": "A one-sentence summary a student can use for quick revision."
 }`;
+
+const EXAM_STYLE_INSTRUCTION = `VERY IMPORTANT: This student wants to see exactly how to write this answer to get FULL MARKS in a Pakistani Board Exam (Matric/Intermediate).
+Structure the "explanation" section with these exact sub-headings (translated if in Urdu):
+1. **Main Heading** (Capitalized/Centralized style)
+2. **Statement / Introduction**
+3. **Key Characteristics / Bullet Points**
+4. **Conclusion / Key Takeaway**
+
+Also, if applicable, insert a "Diagram Suggestion" note like: [DIAGRAM: Draw a neat labelled diagram of X here].
+Bold and highlight all important keywords and terminologies. Use clear headers for each section.`;
 
 function parseStructuredResponse(raw) {
   const cleaned = raw.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '').trim();
@@ -48,13 +58,11 @@ function parseStructuredResponse(raw) {
 // POST /api/ai/explain
 exports.explain = async (req, res, next) => {
   try {
-    const { topic, level, language } = req.body;
+    const { topic, level, language, mode } = req.body;
 
     if (!topic || !topic.trim()) {
       return res.status(400).json({ error: 'topic is required' });
     }
-
-    const model = getModel();
 
     // Personalize prompt based on academic profile
     const profile = req.user.academicProfile || {};
@@ -62,14 +70,19 @@ exports.explain = async (req, res, next) => {
       ? `This student is at the "${profile.educationLevel}" level, studying "${profile.fieldOfStudy}" (${profile.currentYear}).`
       : `This student is at a "${level || 'intermediate'}" level.`;
 
-    const systemInstruction = `${STRUCTURED_SYSTEM_PROMPT}
+    const systemInstruction = `
+${STRUCTURED_SYSTEM_PROMPT}
+
 ${profileInfo} Tailor your tone, complexity, and examples exactly for this grade level.
+
+${mode === 'exam' ? EXAM_STYLE_INSTRUCTION : ''}
+
 ${language === 'urdu' ? 'Respond in Urdu language.' : ''}`;
 
-    const result = await model.generateContent({
+    const result = await generateWithFailover({
+      prompt: topic.trim(),
       systemInstruction,
-      contents: [{ role: 'user', parts: [{ text: topic.trim() }] }],
-      generationConfig: { temperature: 0.6, maxOutputTokens: 1024 },
+      generationConfig: { temperature: 0.6, maxOutputTokens: 1024 }
     });
 
     const raw = result.response.text();

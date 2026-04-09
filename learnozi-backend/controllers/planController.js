@@ -56,14 +56,6 @@ exports.generateWithAI = async (req, res, next) => {
   try {
     const { title, subjects, examDate, preferences } = req.body;
 
-    if (!config.gemini?.apiKey) {
-      return res.status(500).json({ error: 'Gemini API key not configured' });
-    }
-
-    const { GoogleGenerativeAI } = require('@google/generative-ai');
-    const genAI = new GoogleGenerativeAI(config.gemini.apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
     const prompt = `You are a study planning assistant for Pakistani students.
 Generate a detailed study plan as a JSON array of tasks.
 
@@ -79,9 +71,9 @@ Details:
 - Preferences: ${preferences || 'None'}
 - Start from tomorrow`;
 
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.5, maxOutputTokens: 2000 },
+    const result = await generateWithFailover({
+      prompt,
+      generationConfig: { temperature: 0.5, maxOutputTokens: 2000 }
     });
 
     const raw = result.response.text();

@@ -9,7 +9,7 @@ const getModel = () => {
     throw new Error('Gemini API key is missing');
   }
   const genAI = new GoogleGenerativeAI(config.gemini.apiKey);
-  return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  return genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 };
 
 // POST /api/documents/upload
@@ -110,8 +110,6 @@ exports.chatDocument = async (req, res, next) => {
       return res.status(404).json({ error: 'Document not found' });
     }
 
-    const model = getModel();
-
     // RAG Strategy: Inject the extracted text as the primary brain for the AI
     // Personalize based on profile
     const profile = req.user.academicProfile || {};
@@ -137,17 +135,13 @@ ${doc.extractedText}
       parts: [{ text: msg.content }],
     }));
 
-    // Start a chat session
-    const chat = model.startChat({
-      history: [
-        { role: 'user', parts: [{ text: systemPrompt }] },
-        { role: 'model', parts: [{ text: 'Understood. I will strictly use only the provided document text.' }] },
-        ...formattedHistory
-      ],
-      generationConfig: { temperature: 0.2 }, // Low temp to prevent hallucination
+    const result = await generateWithFailover({
+      prompt: question,
+      systemInstruction: systemPrompt,
+      history: formattedHistory,
+      generationConfig: { temperature: 0.3 }
     });
 
-    const result = await chat.sendMessage(question);
     const answer = result.response.text();
 
     res.json({ answer });

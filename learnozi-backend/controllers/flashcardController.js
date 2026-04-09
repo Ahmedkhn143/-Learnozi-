@@ -1,15 +1,5 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 const FlashcardSet = require('../models/Flashcard');
-const config = require('../config');
-
-// Gemini helper
-function getModel() {
-  if (!config.gemini.apiKey) {
-    throw Object.assign(new Error('Gemini API key not configured'), { statusCode: 503 });
-  }
-  const genAI = new GoogleGenerativeAI(config.gemini.apiKey);
-  return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-}
+const { generateWithFailover } = require('../utils/gemini');
 
 // ── POST /api/flashcards/generate ────────────────────────
 // AI se flashcards generate karo
@@ -22,7 +12,6 @@ exports.generate = async (req, res, next) => {
     }
 
     const cardCount = Math.min(20, Math.max(5, parseInt(count)));
-    const model = getModel();
 
     const langInstruction = language === 'urdu'
       ? 'Write both questions and answers in Urdu (you can use Roman Urdu).'

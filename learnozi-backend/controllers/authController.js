@@ -38,7 +38,13 @@ exports.register = async (req, res, next) => {
 
     res.status(201).json({
       message: 'Account created! Please check your email to verify your account.',
-      user: { id: user._id, name: user.name, email: user.email },
+      user: { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email,
+        isOnboarded: user.isOnboarded,
+        academicProfile: user.academicProfile 
+      },
     });
   } catch (error) {
     next(error);
@@ -70,7 +76,13 @@ exports.verifyEmail = async (req, res, next) => {
     res.json({
       message: 'Email verified successfully!',
       token: jwtToken,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email,
+        isOnboarded: user.isOnboarded,
+        academicProfile: user.academicProfile 
+      },
     });
   } catch (error) {
     next(error);
@@ -130,7 +142,13 @@ exports.login = async (req, res, next) => {
 
     res.json({
       token,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email,
+        isOnboarded: user.isOnboarded,
+        academicProfile: user.academicProfile 
+      },
     });
   } catch (error) {
     next(error);

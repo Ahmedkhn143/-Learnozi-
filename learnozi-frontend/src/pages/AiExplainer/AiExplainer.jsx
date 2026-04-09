@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
+import { useLanguage } from '../../context/LanguageContext';
 import './AiExplainer.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -18,13 +19,20 @@ const SUGGESTIONS_UR = [
 ];
 
 export default function AiExplainer() {
+  const { language: globalLang, setLanguage: setGlobalLang } = useLanguage();
   const [topic, setTopic]       = useState('');
   const [level, setLevel]       = useState('intermediate');
-  const [language, setLanguage] = useState('english');
+  const [language, setLanguage] = useState(globalLang === 'ur' ? 'urdu' : 'english');
+  const [mode, setMode]         = useState('standard'); // 'standard' or 'exam'
   const [result, setResult]     = useState(null);
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
   const resultRef = useRef(null);
+
+  // Sync with global language
+  useEffect(() => {
+    setLanguage(globalLang === 'ur' ? 'urdu' : 'english');
+  }, [globalLang]);
 
   useEffect(() => {
     if (result) resultRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -38,7 +46,7 @@ export default function AiExplainer() {
       const token = localStorage.getItem('token');
       const { data } = await axios.post(
         `${API_URL}/api/ai/explain`,
-        { topic: query, level, language },
+        { topic: query, level, language, mode },
         { headers: token ? { Authorization: `Bearer ${token}` } : {}, timeout: 30000 }
       );
       if (!data.explanation) throw new Error('Empty response from AI');
@@ -55,6 +63,11 @@ export default function AiExplainer() {
 
   const handleSubmit = (e) => { e.preventDefault(); fetchExplanation(); };
   const handleReset  = () => { setTopic(''); setResult(null); setError(''); };
+
+  const setAppLanguage = (langCode) => {
+    setGlobalLang(langCode);
+    setLanguage(langCode === 'ur' ? 'urdu' : 'english');
+  };
 
   const suggestions = language === 'urdu' ? SUGGESTIONS_UR : SUGGESTIONS_EN;
   const isUrdu = language === 'urdu';
@@ -73,13 +86,13 @@ export default function AiExplainer() {
           <div className="ai-lang-toggle">
             <button
               className={`ai-lang-btn${!isUrdu ? ' active' : ''}`}
-              onClick={() => setLanguage('english')}
+              onClick={() => setAppLanguage('en')}
             >
               EN
             </button>
             <button
               className={`ai-lang-btn${isUrdu ? ' active' : ''}`}
-              onClick={() => setLanguage('urdu')}
+              onClick={() => setAppLanguage('ur')}
             >
               اردو
             </button>
@@ -94,6 +107,16 @@ export default function AiExplainer() {
             <option value="intermediate">Intermediate</option>
             <option value="advanced">Advanced</option>
           </select>
+
+          {/* Exam Mode Toggle */}
+          <button
+            className={`exam-mode-toggle ${mode === 'exam' ? 'active' : ''}`}
+            onClick={() => setMode(mode === 'exam' ? 'standard' : 'exam')}
+            title="Board Paper Presentation Mode"
+          >
+            <span className="exam-mode-icon">📝</span>
+            <span className="exam-mode-text">Exam Mode</span>
+          </button>
 
           {result && (
             <button className="btn btn-secondary" onClick={handleReset}>New Topic</button>
