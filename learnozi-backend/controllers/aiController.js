@@ -191,3 +191,62 @@ exports.deleteConversation = async (req, res, next) => {
     next(error);
   }
 };
+
+// POST /api/ai/summarize — Notes Summarizer
+exports.summarize = async (req, res, next) => {
+  try {
+    const { text, language = 'english' } = req.body;
+
+    const model = getModel();
+
+    const langInstruction = language === 'urdu'
+      ? 'Respond in Urdu (Roman Urdu is fine).'
+      : 'Respond in clear English.';
+
+    const prompt = `You are a study assistant for Pakistani students.
+Summarize the following text into 5-7 concise bullet points and extract key terms.
+${langInstruction}
+
+Respond with ONLY valid JSON — no markdown, no code fences.
+Use this exact schema:
+{
+  "bullets": ["bullet point 1", "bullet point 2", ...],
+  "keyTerms": [
+    { "term": "Term Name", "definition": "Brief definition" }
+  ],
+  "oneLineSummary": "A single-sentence summary of the entire text."
+}
+
+Text to summarize:
+"""
+${text.substring(0, 12000)}
+"""`;
+
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.4, maxOutputTokens: 1500 },
+    });
+
+    const raw = result.response.text();
+    const cleaned = raw.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '').trim();
+
+    let parsed;
+    try {
+      parsed = JSON.parse(cleaned);
+    } catch {
+      return res.status(500).json({ error: 'AI response could not be parsed. Please try again.' });
+    }
+
+    if (!parsed.bullets || !Array.isArray(parsed.bullets)) {
+      return res.status(500).json({ error: 'AI did not return valid summary. Please try again.' });
+    }
+
+    res.json({
+      bullets: parsed.bullets,
+      keyTerms: parsed.keyTerms || [],
+      oneLineSummary: parsed.oneLineSummary || '',
+    });
+  } catch (error) {
+    next(error);
+  }
+};

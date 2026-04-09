@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
+const validate = require('../middleware/validate');
+const schemas = require('../validators');
 const {
   explain,
   chat,
+  summarize,
   getConversations,
   getConversation,
   deleteConversation,
@@ -13,10 +16,13 @@ const {
 router.use(auth);
 
 // Explain a concept (new conversation)
-router.post('/explain', explain);
+router.post('/explain', validate(schemas.explain), explain);
 
 // Continue chatting
-router.post('/chat', chat);
+router.post('/chat', validate(schemas.chat), chat);
+
+// Summarize notes
+router.post('/summarize', validate(schemas.summarize), summarize);
 
 // Conversation history
 router.get('/conversations', getConversations);
