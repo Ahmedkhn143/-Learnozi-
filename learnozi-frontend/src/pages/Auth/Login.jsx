@@ -15,6 +15,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [errors, setErrors]     = useState({});
   const [serverError, setServerError] = useState('');
+  const [needsVerification, setNeedsVerification] = useState(false);
   const [loading, setLoading]   = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setServerError('');
+    setNeedsVerification(false);
     const errs = validate();
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setErrors({});
@@ -40,9 +42,24 @@ export default function Login() {
       login(data.token, data.user);
       navigate('/dashboard');
     } catch (err) {
-      setServerError(err.response?.data?.error || 'Login nahi hua. Dobara try karo.');
+      const errData = err.response?.data;
+      if (errData?.needsVerification) {
+        setNeedsVerification(true);
+      }
+      setServerError(errData?.error || 'Login nahi hua. Dobara try karo.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    try {
+      await axios.post(`${API_URL}/api/auth/resend-verification`, { email });
+      setServerError('');
+      setNeedsVerification(false);
+      alert('Verification email bhej diya! Apna inbox check karo.');
+    } catch {
+      // silently fail
     }
   };
 
@@ -60,6 +77,11 @@ export default function Login() {
         </div>
 
         {serverError && <div className="auth-error">{serverError}</div>}
+        {needsVerification && (
+          <button className="btn btn-ghost" style={{ width: '100%', marginBottom: '0.75rem' }} onClick={handleResend}>
+            Resend verification email
+          </button>
+        )}
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className="form-group">
@@ -84,6 +106,10 @@ export default function Login() {
             {errors.password && <span className="field-error">{errors.password}</span>}
           </div>
 
+          <div className="auth-forgot">
+            <Link to="/forgot-password">Password bhool gaye?</Link>
+          </div>
+
           <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
             {loading ? 'Sign in ho raha hai…' : 'Sign In'}
           </button>
@@ -96,3 +122,4 @@ export default function Login() {
     </div>
   );
 }
+
