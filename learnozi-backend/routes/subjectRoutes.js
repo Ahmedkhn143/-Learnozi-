@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
+const validate = require('../middleware/validate');
+const schemas = require('../validators');
 const {
   getSubjects,
   getSubject,
@@ -14,8 +16,8 @@ router.use(auth);
 
 router.get('/', getSubjects);
 router.get('/:id', getSubject);
-router.post('/', createSubject);
-router.put('/:id', updateSubject);
+router.post('/', validate(schemas.createSubject), createSubject);
+router.put('/:id', validate(schemas.updateSubject), updateSubject);
 router.delete('/:id', deleteSubject);
 
 module.exports = router;
