@@ -19,6 +19,7 @@ export default function Navbar() {
     { to: '/ai-explainer', label: t('nav.ai_explainer') },
     { to: '/flashcards',   label: `🃏 ${t('nav.flashcards')}` },
     { to: '/timer',        label: `⏱️ ${t('nav.timer')}` },
+    { to: '/notes',        label: '📝 Notes' },
   ];
 
   return (
@@ -45,7 +46,7 @@ export default function Navbar() {
         </button>
         {user ? (
           <>
-            <span className="navbar-user">👤 {user.name}</span>
+            <Link to="/profile" className="navbar-user" style={{ textDecoration: 'none', color: 'inherit' }}>👤 {user.name}</Link>
             <button className="btn btn-ghost" onClick={handleLogout}>{t('nav.logout')}</button>
           </>
         ) : (
