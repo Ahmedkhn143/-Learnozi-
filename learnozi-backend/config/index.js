@@ -19,4 +19,12 @@ module.exports = {
     apiKey: process.env.GEMINI_API_KEY,
   },
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
+  email: {
+    host: process.env.EMAIL_HOST || 'smtp.ethereal.email',
+    port: parseInt(process.env.EMAIL_PORT) || 587,
+    secure: process.env.EMAIL_SECURE === 'true',
+    user: process.env.EMAIL_USER || '',
+    pass: process.env.EMAIL_PASS || '',
+    from: process.env.EMAIL_FROM || '"Learnozi" <noreply@learnozi.com>',
+  },
 };

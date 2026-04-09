@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth } from '../../context/AuthContext';
 import './Auth.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -17,8 +16,7 @@ export default function Signup() {
   const [errors, setErrors]     = useState({});
   const [serverError, setServerError] = useState('');
   const [loading, setLoading]   = useState(false);
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const [registered, setRegistered] = useState(false);
 
   const validate = () => {
     const e = {};
@@ -39,9 +37,8 @@ export default function Signup() {
     setErrors({});
     setLoading(true);
     try {
-      const { data } = await axios.post(`${API_URL}/api/auth/register`, { name, email, password });
-      login(data.token, data.user);
-      navigate('/dashboard');
+      await axios.post(`${API_URL}/api/auth/register`, { name, email, password });
+      setRegistered(true);
     } catch (err) {
       setServerError(err.response?.data?.error || 'Signup nahi hua. Dobara try karo.');
     } finally {
@@ -49,7 +46,46 @@ export default function Signup() {
     }
   };
 
+  const handleResend = async () => {
+    try {
+      await axios.post(`${API_URL}/api/auth/resend-verification`, { email });
+    } catch {
+      // silently fail
+    }
+  };
+
   const clearErr = (field) => errors[field] && setErrors((e) => ({ ...e, [field]: '' }));
+
+  // ── After successful registration → show "check your email" ──
+  if (registered) {
+    return (
+      <div className="auth-page">
+        <div className="card auth-card" style={{ textAlign: 'center' }}>
+          <div className="auth-header">
+            <Link to="/" className="auth-logo">L</Link>
+          </div>
+          <div className="verify-icon success">✉</div>
+          <h2>Check Your Email! 📬</h2>
+          <p style={{ color: 'var(--color-text-secondary)', marginTop: '0.5rem', lineHeight: 1.6 }}>
+            Hum ne <strong>{email}</strong> pe ek verification link bheja hai.
+            Pehle email verify karo, phir login kar sako ge.
+          </p>
+          <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <Link to="/login" className="btn btn-primary" style={{ width: '100%' }}>
+              Go to Login
+            </Link>
+            <button
+              className="btn btn-ghost"
+              style={{ width: '100%' }}
+              onClick={handleResend}
+            >
+              Resend verification email
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="auth-page">

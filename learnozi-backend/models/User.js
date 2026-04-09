@@ -27,6 +27,18 @@ const userSchema = new mongoose.Schema(
       studyHoursPerDay: { type: Number, default: 4, min: 1, max: 16 },
       subjects: [{ type: String, trim: true }],
     },
+
+    // ── Email verification ─────────────────────────────────
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: String,
+    verificationTokenExpires: Date,
+
+    // ── Password reset ─────────────────────────────────────
+    resetPasswordToken: String,
+    resetPasswordTokenExpires: Date,
   },
   { timestamps: true }
 );
