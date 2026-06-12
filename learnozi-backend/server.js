@@ -1,3 +1,4 @@
+require('./utils/mongooseMock');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');

@@ -10,6 +10,7 @@ const {
   getDocument,
   deleteDocument,
   chatDocument,
+  aiTools,
 } = require('../controllers/documentController');
 
 // Multer setup - store files in memory to parse them, max size 15MB
@@ -33,6 +34,9 @@ router.post('/upload', upload.single('document'), uploadDocument);
 
 // Chat with specific document
 router.post('/:id/chat', validate(schemas.chatDocument), chatDocument);
+
+// AI tools (summarization & auto-flashcards generation)
+router.post('/:id/ai-tools', aiTools);
 
 // Manage documents
 router.get('/', getDocuments);

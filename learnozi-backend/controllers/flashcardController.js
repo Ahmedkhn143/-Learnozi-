@@ -36,7 +36,7 @@ Rules:
 - Cover different aspects of the topic
 - Make it useful for exam preparation`;
 
-    const result = await model.generateContent(prompt);
+    const result = await generateWithFailover({ prompt });
     const raw = result.response.text();
 
     // Parse JSON
@@ -235,3 +235,61 @@ exports.togglePublic = async (req, res, next) => {
     next(error);
   }
 };
+
+// ── POST /api/flashcards/:id/cards/:cardId/review ─────────────
+// Review a card using Spaced Repetition (SM-2 Algorithm)
+exports.reviewCard = async (req, res, next) => {
+  try {
+    const { rating } = req.body; // rating should be 1 (Hard), 3 (Medium), or 5 (Easy)
+    if (![1, 3, 5].includes(rating)) {
+      return res.status(400).json({ error: 'Rating must be 1 (Hard), 3 (Medium), or 5 (Easy)' });
+    }
+
+    const set = await FlashcardSet.findOne({ _id: req.params.id, user: req.user._id });
+    if (!set) return res.status(404).json({ error: 'Flashcard set not found' });
+
+    const card = set.cards.id(req.params.cardId);
+    if (!card) return res.status(404).json({ error: 'Card not found' });
+
+    // Initialize SRS fields if they don't exist
+    let repetitions = card.repetitions || 0;
+    let interval = card.interval || 0;
+    let easeFactor = card.easeFactor || 2.5;
+
+    // SM-2 calculation
+    if (rating >= 3) { // Correct response
+      if (repetitions === 0) {
+        interval = 1;
+      } else if (repetitions === 1) {
+        interval = 6;
+      } else {
+        interval = Math.ceil(interval * easeFactor);
+      }
+      repetitions++;
+    } else { // Incorrect/Hard response
+      repetitions = 0;
+      interval = 1;
+    }
+
+    // Update Ease Factor
+    easeFactor = easeFactor + (0.1 - (5 - rating) * (0.08 + (5 - rating) * 0.02));
+    if (easeFactor < 1.3) easeFactor = 1.3;
+
+    // Update card fields
+    card.repetitions = repetitions;
+    card.interval = interval;
+    card.easeFactor = easeFactor;
+    card.nextReviewDate = new Date(Date.now() + interval * 24 * 60 * 60 * 1000);
+    card.reviewedAt = new Date();
+
+    // Map status
+    card.status = repetitions > 1 ? 'known' : 'learning';
+
+    await set.save();
+
+    res.json({ card, progress: set.progress });
+  } catch (error) {
+    next(error);
+  }
+};
+

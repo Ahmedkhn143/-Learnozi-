@@ -1,4 +1,5 @@
 const StudyPlan = require('../models/StudyPlan');
+const { generateWithFailover } = require('../utils/gemini');
 const config = require('../config');
 
 // GET /api/plans — list all user's plans (paginated)

@@ -9,6 +9,10 @@ const cardSchema = new mongoose.Schema({
     default: 'new',
   },
   reviewedAt: { type: Date },
+  interval: { type: Number, default: 0 },
+  repetitions: { type: Number, default: 0 },
+  easeFactor: { type: Number, default: 2.5 },
+  nextReviewDate: { type: Date, default: Date.now }
 });
 
 const flashcardSetSchema = new mongoose.Schema(

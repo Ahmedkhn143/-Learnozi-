@@ -1,6 +1,8 @@
 const Document = require('../models/Document');
+const FlashcardSet = require('../models/Flashcard');
 const pdf = require('pdf-parse');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { generateWithFailover } = require('../utils/gemini');
 const config = require('../config');
 
 // Reusable function to get Gemini model
@@ -147,6 +149,85 @@ ${doc.extractedText}
     res.json({ answer });
   } catch (error) {
     console.error('Document Chat Error:', error.message);
+    next(error);
+  }
+};
+
+// POST /api/documents/:id/ai-tools
+exports.aiTools = async (req, res, next) => {
+  try {
+    const doc = await Document.findOne({ _id: req.params.id, user: req.user._id });
+    if (!doc) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    const { options = ['summary', 'flashcards'] } = req.body;
+    const textChunk = doc.extractedText.slice(0, 15000); // safety length limit
+
+    let summary = '';
+    let flashcardSet = null;
+
+    if (options.includes('summary')) {
+      const summaryPrompt = `You are an expert academic study assistant.
+Analyze the following extracted text from a student's document and generate a comprehensive, highly structured, and clear study summary.
+Use bullet points, bold key terms, and clear sections. You can write in English or Roman Urdu if the text is in Urdu.
+
+Text:
+${textChunk}`;
+      
+      const summaryResult = await generateWithFailover({
+        prompt: summaryPrompt,
+        generationConfig: { temperature: 0.4, maxOutputTokens: 2000 }
+      });
+      summary = summaryResult.response.text();
+    }
+
+    if (options.includes('flashcards')) {
+      const flashcardPrompt = `You are a study aid generator.
+Analyze the following text and generate a JSON array of 8-12 high-quality study flashcards for active recall.
+Each flashcard must have a 'question' and an 'answer' property.
+Respond with ONLY the JSON array — no markdown, no code fences.
+
+Text:
+${textChunk}`;
+
+      const flashcardResult = await generateWithFailover({
+        prompt: flashcardPrompt,
+        generationConfig: { temperature: 0.5, maxOutputTokens: 2500 }
+      });
+
+      const rawFlashcards = flashcardResult.response.text();
+      let cards = [];
+      try {
+        const cleaned = rawFlashcards.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '').trim();
+        const jsonMatch = cleaned.match(/\[[\s\S]*\]/);
+        cards = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
+      } catch (err) {
+        console.error('Failed to parse AI flashcards response:', err.message);
+      }
+
+      if (cards.length > 0) {
+        // Save cards as a new FlashcardSet
+        flashcardSet = await FlashcardSet.create({
+          user: req.user._id,
+          title: `AI Deck - ${doc.title}`,
+          subject: doc.subject || 'General',
+          cards: cards.map(c => ({
+            question: c.question,
+            answer: c.answer,
+            status: 'new'
+          })),
+          isAIGenerated: true
+        });
+      }
+    }
+
+    res.json({
+      summary,
+      flashcardSet
+    });
+  } catch (error) {
+    console.error('AI Tools Error:', error.message);
     next(error);
   }
 };

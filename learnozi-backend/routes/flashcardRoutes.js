@@ -14,6 +14,7 @@ router.post('/generate',  validate(schemas.generateFlashcards), fc.generate);
 router.get('/:id',        fc.getSet);
 router.delete('/:id',     fc.deleteSet);
 router.patch('/:id/cards/:cardId', validate(schemas.updateCard), fc.updateCard);
+router.post('/:id/cards/:cardId/review', fc.reviewCard);
 router.post('/:id/clone', fc.cloneSet);
 router.patch('/:id/public', fc.togglePublic);
 
