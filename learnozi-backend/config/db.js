@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const config = require('./index');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongoServer;
 
@@ -17,6 +16,7 @@ const connectDB = async () => {
     console.log(`🚀 Starting in-memory MongoDB server for local development...`);
     
     try {
+      const { MongoMemoryServer } = require('mongodb-memory-server');
       mongoServer = await MongoMemoryServer.create();
       const mongoUri = mongoServer.getUri();
       const conn = await mongoose.connect(mongoUri);
