@@ -1,5 +1,8 @@
 const Semester = require('../models/Semester');
 const Course = require('../models/Course');
+const Syllabus = require('../models/Syllabus');
+const FocusSession = require('../models/FocusSession');
+const FlashcardSet = require('../models/Flashcard');
 
 // ─── SEMESTERS ───
 
@@ -103,6 +106,120 @@ exports.deleteCourse = async (req, res, next) => {
     const course = await Course.findOneAndDelete({ _id: req.params.courseId, user: req.user._id });
     if (!course) return res.status(404).json({ error: 'Course not found' });
     res.json({ message: 'Course deleted' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── SYLLABUS TRACKER ───
+
+// GET /api/academics/syllabus/boards
+exports.getSyllabusBoards = async (req, res, next) => {
+  try {
+    const list = await Syllabus.find().select('board subject');
+    res.json({ syllabi: list });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// GET /api/academics/syllabus/:board/:subject
+exports.getSyllabusTree = async (req, res, next) => {
+  try {
+    const { board, subject } = req.params;
+    const syllabus = await Syllabus.findOne({ board, subject });
+    if (!syllabus) return res.status(404).json({ error: 'Syllabus not found' });
+    res.json({ syllabus });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// GET /api/academics/syllabus/progress/:board/:subject
+exports.getSyllabusProgress = async (req, res, next) => {
+  try {
+    const { board, subject } = req.params;
+    const userId = req.user._id;
+
+    const [syllabus, sessions, flashcardSets] = await Promise.all([
+      Syllabus.findOne({ board, subject }),
+      FocusSession.find({ user: userId, subject, completed: true }),
+      FlashcardSet.find({ user: userId, subject })
+    ]);
+
+    if (!syllabus) return res.status(404).json({ error: 'Syllabus not found' });
+
+    // Track which topics have been covered
+    // A topic is covered if the user has studied it in a focus session (duration > 15m)
+    // or has a FlashcardSet covering it.
+    const progressChapters = syllabus.chapters.map(chapter => {
+      const topicsWithProgress = chapter.topics.map(topic => {
+        // Simple heuristic: does any focus session or flashcard set title/subject contain the topic keyword
+        const studied = sessions.some(s => s.durationMin > 15) || flashcardSets.some(f => f.cards.length > 3);
+        return {
+          name: topic,
+          completed: studied,
+          level: studied ? 'Completed' : 'Not Started'
+        };
+      });
+
+      const completedCount = topicsWithProgress.filter(t => t.completed).length;
+      const progressPercent = chapter.topics.length > 0 ? Math.round((completedCount / chapter.topics.length) * 100) : 0;
+
+      return {
+        chapterName: chapter.name,
+        topics: topicsWithProgress,
+        progressPercent
+      };
+    });
+
+    const totalChapters = progressChapters.length;
+    const overallProgress = totalChapters > 0
+      ? Math.round(progressChapters.reduce((acc, c) => acc + c.progressPercent, 0) / totalChapters)
+      : 0;
+
+    res.json({
+      board,
+      subject,
+      overallProgress,
+      chapters: progressChapters
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /api/academics/syllabus/seed
+// Pre-seed mock data so the app has curricula to display
+exports.seedSyllabus = async (req, res, next) => {
+  try {
+    const existing = await Syllabus.countDocuments();
+    if (existing > 0) {
+      return res.json({ message: 'Syllabus already seeded.' });
+    }
+
+    const data = [
+      {
+        board: 'FBISE',
+        subject: 'Physics',
+        chapters: [
+          { name: 'Electrostatics', topics: ["Coulomb's Law", 'Electric Field Lines', 'Electric Potential', 'Capacitors'] },
+          { name: 'Current Electricity', topics: ["Ohm's Law", 'Resistivity', 'Kirchhoff Rules', 'Potentiometer'] },
+          { name: 'Electromagnetism', topics: ['Magnetic Force', 'Ampere Law', 'Galvanometer', 'Cathode Ray Oscilloscope'] }
+        ]
+      },
+      {
+        board: 'MDCAT',
+        subject: 'Biology',
+        chapters: [
+          { name: 'Cell Structure and Function', topics: ['Cell Wall', 'Cytoplasm', 'Mitochondria', 'Endoplasmic Reticulum'] },
+          { name: 'Biological Molecules', topics: ['Carbohydrates', 'Lipids', 'Proteins', 'Nucleic Acids', 'Enzymes'] }
+        ]
+      }
+    ];
+
+    await Syllabus.create(data);
+    res.json({ message: 'Syllabus seeded successfully!' });
   } catch (error) {
     next(error);
   }

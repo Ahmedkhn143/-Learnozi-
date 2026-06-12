@@ -275,3 +275,76 @@ ${text.substring(0, 12000)}
     next(error);
   }
 };
+
+// POST /api/ai/socratic-chat
+exports.socraticChat = async (req, res, next) => {
+  try {
+    const { message, conversationId, topic, subject } = req.body;
+
+    if (!message && !topic) {
+      return res.status(400).json({ error: 'message or topic is required' });
+    }
+
+    let conversation;
+    if (conversationId) {
+      conversation = await Conversation.findOne({ _id: conversationId, user: req.user._id });
+      if (!conversation) return res.status(404).json({ error: 'Conversation not found' });
+    } else {
+      conversation = await Conversation.create({
+        user: req.user._id,
+        topic: topic || message.substring(0, 100),
+        subject: subject || 'General',
+        messages: [],
+      });
+    }
+
+    if (message) {
+      conversation.messages.push({ role: 'user', content: message });
+    }
+
+    const profile = req.user.academicProfile || {};
+    const profileInfo = req.user.isOnboarded 
+      ? `The student is in "${profile.educationLevel}" level, studying "${profile.fieldOfStudy}" (${profile.currentYear}).`
+      : "";
+
+    const systemPrompt = `You are a strict but encouraging Socratic tutor. 
+Your goal is to help the student learn the subject "${conversation.subject}" by asking probing questions rather than giving direct answers.
+${profileInfo}
+
+Rules:
+1. NEVER give direct answers or explanations, even if the student asks for them directly.
+2. Ask only ONE question at a time.
+3. Guide the student step-by-step to arrive at the answer on their own.
+4. If they give an incorrect answer, ask a clarifying question to show them the flaw in their reasoning.
+5. If they are correct, validate it enthusiastically and ask the next logical question to deepen understanding.
+6. Speak in the language they use (English or Roman Urdu).`;
+
+    const history = conversation.messages
+      .slice(-10)
+      .map((m) => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }],
+      }));
+
+    const promptMessage = message || `Start our Socratic study session on the topic: ${topic}`;
+
+    const { generateWithFailover } = require('../utils/gemini');
+    const result = await generateWithFailover({
+      prompt: promptMessage,
+      systemInstruction: systemPrompt,
+      history: history.length > 1 ? history.slice(0, -1) : undefined,
+      generationConfig: { temperature: 0.6, maxOutputTokens: 1024 }
+    });
+
+    const reply = result.response.text();
+
+    conversation.messages.push({ role: 'assistant', content: reply });
+    await conversation.save();
+
+    res.json({ reply, conversationId: conversation._id });
+  } catch (error) {
+    console.error('Socratic Chat Error:', error.message);
+    next(error);
+  }
+};
+

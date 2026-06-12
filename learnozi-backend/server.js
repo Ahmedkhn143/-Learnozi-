@@ -17,6 +17,7 @@ const flashcardRoutes = require('./routes/flashcardRoutes');
 const focusRoutes     = require('./routes/focusRoutes');
 const documentRoutes  = require('./routes/documentRoutes');
 const academicRoutes  = require('./routes/academicRoutes');
+const analyticsRoutes = require('./routes/analyticsRoutes');
 
 const app = express();
 
@@ -46,6 +47,7 @@ app.use('/api/flashcards', flashcardRoutes);
 app.use('/api/focus',      focusRoutes);
 app.use('/api/documents',  documentRoutes);
 app.use('/api/academics',  academicRoutes);
+app.use('/api/analytics',  analyticsRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: 'Route not found' }));
 app.use(errorHandler);

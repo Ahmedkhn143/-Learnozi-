@@ -10,7 +10,11 @@ const {
   deleteSemester,
   createCourse,
   updateCourse,
-  deleteCourse
+  deleteCourse,
+  getSyllabusBoards,
+  getSyllabusTree,
+  getSyllabusProgress,
+  seedSyllabus
 } = require('../controllers/academicController');
 
 router.use(auth);
@@ -25,5 +29,11 @@ router.delete('/:id', deleteSemester);
 router.post('/:semesterId/courses', validate(schemas.createCourse), createCourse);
 router.put('/courses/:courseId', validate(schemas.updateCourse), updateCourse);
 router.delete('/courses/:courseId', deleteCourse);
+
+// Syllabus Tracker
+router.get('/syllabus/boards', getSyllabusBoards);
+router.post('/syllabus/seed', seedSyllabus);
+router.get('/syllabus/:board/:subject', getSyllabusTree);
+router.get('/syllabus/progress/:board/:subject', getSyllabusProgress);
 
 module.exports = router;

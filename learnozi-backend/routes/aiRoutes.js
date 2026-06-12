@@ -10,7 +10,9 @@ const {
   getConversations,
   getConversation,
   deleteConversation,
+  socraticChat,
 } = require('../controllers/aiController');
+const { generateMindMap } = require('../controllers/mindmapController');
 
 // All AI routes are protected
 router.use(auth);
@@ -28,5 +30,9 @@ router.post('/summarize', validate(schemas.summarize), summarize);
 router.get('/conversations', getConversations);
 router.get('/conversations/:id', getConversation);
 router.delete('/conversations/:id', deleteConversation);
+
+// Advanced features
+router.post('/mindmap', generateMindMap);
+router.post('/socratic-chat', socraticChat);
 
 module.exports = router;
