@@ -1,24 +1,35 @@
-require('./utils/mongooseMock');
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const connectDB = require('./config/db');
-const config = require('./config');
-const errorHandler = require('./middleware/errorHandler');
+// ─── Diagnostic: catch any top-level require crash ────────────────────────────
+function safeRequire(modulePath) {
+  try {
+    return require(modulePath);
+  } catch (e) {
+    console.error(`[STARTUP CRASH] Failed to require "${modulePath}": ${e.message}`);
+    throw e; // re-throw so Vercel logs show it
+  }
+}
 
-const authRoutes      = require('./routes/authRoutes');
-const subjectRoutes   = require('./routes/subjectRoutes');
-const examRoutes      = require('./routes/examRoutes');
-const scheduleRoutes  = require('./routes/scheduleRoutes');
-const planRoutes      = require('./routes/planRoutes');
-const aiRoutes        = require('./routes/aiRoutes');
-const flashcardRoutes = require('./routes/flashcardRoutes');
-const focusRoutes     = require('./routes/focusRoutes');
-const documentRoutes  = require('./routes/documentRoutes');
-const academicRoutes  = require('./routes/academicRoutes');
-const analyticsRoutes = require('./routes/analyticsRoutes');
+safeRequire('./utils/mongooseMock');
+const express     = safeRequire('express');
+const cors        = safeRequire('cors');
+const helmet      = safeRequire('helmet');
+const rateLimit   = safeRequire('express-rate-limit');
+const connectDB   = safeRequire('./config/db');
+const config      = safeRequire('./config');
+const errorHandler = safeRequire('./middleware/errorHandler');
 
+const authRoutes      = safeRequire('./routes/authRoutes');
+const subjectRoutes   = safeRequire('./routes/subjectRoutes');
+const examRoutes      = safeRequire('./routes/examRoutes');
+const scheduleRoutes  = safeRequire('./routes/scheduleRoutes');
+const planRoutes      = safeRequire('./routes/planRoutes');
+const aiRoutes        = safeRequire('./routes/aiRoutes');
+const flashcardRoutes = safeRequire('./routes/flashcardRoutes');
+const focusRoutes     = safeRequire('./routes/focusRoutes');
+const documentRoutes  = safeRequire('./routes/documentRoutes');
+const academicRoutes  = safeRequire('./routes/academicRoutes');
+const analyticsRoutes = safeRequire('./routes/analyticsRoutes');
+
+// ─────────────────────────────────────────────────────────────────────────────
 const app = express();
 
 app.use(helmet());
@@ -29,22 +40,28 @@ const limiter = rateLimit({
   message: { error: 'Too many requests, please try again later.' },
 });
 app.use('/api', limiter);
-app.use('/api/auth', rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { error: 'Too many auth attempts.' } }));
+app.use('/api/auth', rateLimit({
+  windowMs: 15 * 60 * 1000, max: 20,
+  message: { error: 'Too many auth attempts.' },
+}));
 
 app.use(cors({ origin: config.clientUrl, credentials: true }));
 app.use(express.json({ limit: '512kb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Health check — no DB needed (always works)
-app.get('/api/health', (_req, res) => res.json({ 
-  status: 'ok', 
+// ── Health check — no DB needed (always responds) ────────────────────────────
+app.get('/api/health', (_req, res) => res.json({
+  status: 'ok',
   timestamp: new Date().toISOString(),
   env: process.env.NODE_ENV,
-  mockDb: process.env.MOCK_DB,
-  mongoUri: process.env.MONGODB_URI ? process.env.MONGODB_URI.replace(/\/\/.*@/, '//<credentials>@') : 'NOT SET',
+  mongoUri: process.env.MONGODB_URI
+    ? process.env.MONGODB_URI.replace(/\/\/.*@/, '//<credentials>@')
+    : 'NOT SET',
+  jwtSet: !!process.env.JWT_SECRET,
+  supabaseSet: !!process.env.SUPABASE_URL,
 }));
 
-// DB connection middleware — connects lazily on first request (serverless-safe)
+// ── DB middleware — lazy connection (serverless-safe) ─────────────────────────
 app.use(async (req, res, next) => {
   try {
     await connectDB();
@@ -70,21 +87,18 @@ app.use('/api/analytics',  analyticsRoutes);
 app.use((_req, res) => res.status(404).json({ error: 'Route not found' }));
 app.use(errorHandler);
 
-// Local development — start server normally
+// ── Local dev only ────────────────────────────────────────────────────────────
 if (!process.env.VERCEL && process.env.NODE_ENV !== 'production') {
   const port = config.port;
   connectDB()
-    .then(() => {
-      app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
-    })
+    .then(() => app.listen(port, () => console.log(`Server running on http://localhost:${port}`)))
     .catch((err) => {
-      console.error('Failed to connect DB, starting server anyway:', err.message);
+      console.error('DB connect failed, starting anyway:', err.message);
       app.listen(port, () => console.log(`Server running on http://localhost:${port} (no DB)`));
     });
 
-  process.on('SIGINT', () => { console.log('\nSIGINT — shutting down...'); process.exit(0); });
-  process.on('SIGTERM', () => { console.log('\nSIGTERM — shutting down...'); process.exit(0); });
+  process.on('SIGINT',  () => { console.log('\nShutting down...'); process.exit(0); });
+  process.on('SIGTERM', () => { console.log('\nShutting down...'); process.exit(0); });
 }
 
-// Vercel needs synchronous module.exports
 module.exports = app;

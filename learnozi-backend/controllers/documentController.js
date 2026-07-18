@@ -1,9 +1,10 @@
 const Document = require('../models/Document');
 const FlashcardSet = require('../models/Flashcard');
-const pdf = require('pdf-parse');
+// pdf-parse is lazily required inside the function to avoid Vercel cold-start crash
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { generateWithFailover } = require('../utils/gemini');
 const config = require('../config');
+
 
 // Reusable function to get Gemini model
 const getModel = () => {
@@ -26,9 +27,10 @@ exports.uploadDocument = async (req, res, next) => {
       return res.status(400).json({ error: 'Only PDF files are supported' });
     }
 
-    // Extract text from buffer
+    // Extract text from buffer — lazy require to avoid cold-start crash
     let data;
     try {
+      const pdf = require('pdf-parse');
       data = await pdf(req.file.buffer);
     } catch (err) {
       return res.status(400).json({ error: 'Failed to read PDF. It might be corrupted or image-based.' });
