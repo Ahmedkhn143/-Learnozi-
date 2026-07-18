@@ -56,10 +56,16 @@ let server;
 async function start() {
   try {
     await connectDB();
-    server = app.listen(config.port, () => console.log(`Server running on http://localhost:${config.port}`));
+    if (process.env.VERCEL) {
+      console.log('Running in serverless environment (Vercel). Skipping app.listen.');
+    } else {
+      server = app.listen(config.port, () => console.log(`Server running on http://localhost:${config.port}`));
+    }
   } catch (err) {
     console.error('Failed to start server:', err.message);
-    process.exit(1);
+    if (!process.env.VERCEL) {
+      process.exit(1);
+    }
   }
 }
 function shutdown(signal) {
@@ -72,4 +78,5 @@ process.on('SIGTERM', () => shutdown('SIGTERM'));
 start();
 
 module.exports = app;
+
 
