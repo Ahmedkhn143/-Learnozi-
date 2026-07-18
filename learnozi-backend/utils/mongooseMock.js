@@ -2,15 +2,13 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const mongoose = require('mongoose');
 
-const bcrypt = require('bcryptjs');
-
 const dbStore = {
   User: [
     {
       _id: new mongoose.Types.ObjectId(),
       name: 'Test User',
       email: 'test@learnozi.com',
-      password: bcrypt.hashSync('password123', 12),
+      get password() { return require('bcryptjs').hashSync('password123', 10); },
       isVerified: true,
       isOnboarded: true,
       academicProfile: {

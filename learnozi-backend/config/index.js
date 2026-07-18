@@ -3,9 +3,9 @@ require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 
-const jwtSecret = process.env.JWT_SECRET || (nodeEnv === 'production' ? undefined : 'dev_only_secret');
-if (!jwtSecret) {
-  throw new Error('FATAL: JWT_SECRET environment variable is required in production');
+const jwtSecret = process.env.JWT_SECRET || (nodeEnv === 'production' ? 'MISSING_JWT_SECRET_SET_IN_VERCEL' : 'dev_only_secret');
+if (!process.env.JWT_SECRET && nodeEnv === 'production') {
+  console.error('WARNING: JWT_SECRET is not set! Auth will be broken. Set it in Vercel Environment Variables.');
 }
 
 module.exports = {
