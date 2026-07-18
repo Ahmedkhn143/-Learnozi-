@@ -35,6 +35,15 @@ app.use(cors({ origin: config.clientUrl, credentials: true }));
 app.use(express.json({ limit: '512kb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Health check — no DB needed (always works)
+app.get('/api/health', (_req, res) => res.json({ 
+  status: 'ok', 
+  timestamp: new Date().toISOString(),
+  env: process.env.NODE_ENV,
+  mockDb: process.env.MOCK_DB,
+  mongoUri: process.env.MONGODB_URI ? process.env.MONGODB_URI.replace(/\/\/.*@/, '//<credentials>@') : 'NOT SET',
+}));
+
 // DB connection middleware — connects lazily on first request (serverless-safe)
 app.use(async (req, res, next) => {
   try {
@@ -42,11 +51,9 @@ app.use(async (req, res, next) => {
     next();
   } catch (err) {
     console.error('DB connection failed:', err.message);
-    res.status(503).json({ error: 'Database unavailable. Please try again later.' });
+    res.status(503).json({ error: 'Database unavailable', detail: err.message });
   }
 });
-
-app.get('/api/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 app.use('/api/auth',       authRoutes);
 app.use('/api/subjects',   subjectRoutes);
