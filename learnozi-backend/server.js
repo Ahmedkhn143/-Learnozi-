@@ -35,6 +35,17 @@ app.use(cors({ origin: config.clientUrl, credentials: true }));
 app.use(express.json({ limit: '512kb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// DB connection middleware — connects lazily on first request (serverless-safe)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('DB connection failed:', err.message);
+    res.status(503).json({ error: 'Database unavailable. Please try again later.' });
+  }
+});
+
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
 app.use('/api/auth',       authRoutes);
@@ -52,31 +63,21 @@ app.use('/api/analytics',  analyticsRoutes);
 app.use((_req, res) => res.status(404).json({ error: 'Route not found' }));
 app.use(errorHandler);
 
-let server;
-async function start() {
-  try {
-    await connectDB();
-    if (process.env.VERCEL) {
-      console.log('Running in serverless environment (Vercel). Skipping app.listen.');
-    } else {
-      server = app.listen(config.port, () => console.log(`Server running on http://localhost:${config.port}`));
-    }
-  } catch (err) {
-    console.error('Failed to start server:', err.message);
-    if (!process.env.VERCEL) {
-      process.exit(1);
-    }
-  }
-}
-function shutdown(signal) {
-  console.log(`\n${signal} received — shutting down...`);
-  if (server) { server.close(() => process.exit(0)); setTimeout(() => process.exit(1), 10000); }
-  else process.exit(0);
-}
-process.on('SIGINT', () => shutdown('SIGINT'));
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-start();
+// Local development — start server normally
+if (!process.env.VERCEL && process.env.NODE_ENV !== 'production') {
+  const port = config.port;
+  connectDB()
+    .then(() => {
+      app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
+    })
+    .catch((err) => {
+      console.error('Failed to connect DB, starting server anyway:', err.message);
+      app.listen(port, () => console.log(`Server running on http://localhost:${port} (no DB)`));
+    });
 
+  process.on('SIGINT', () => { console.log('\nSIGINT — shutting down...'); process.exit(0); });
+  process.on('SIGTERM', () => { console.log('\nSIGTERM — shutting down...'); process.exit(0); });
+}
+
+// Vercel needs synchronous module.exports
 module.exports = app;
-
-
