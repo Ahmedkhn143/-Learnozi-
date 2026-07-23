@@ -1,0 +1,132 @@
+.planner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.planner-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ── Plan cards grid ── */
+.planner-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.plan-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.plan-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.plan-card-top h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.plan-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.813rem;
+  color: var(--color-text-secondary);
+}
+
+.plan-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.plan-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+.plan-progress-bar {
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.plan-progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+/* ── Task list inside plan ── */
+.plan-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.task-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.85rem;
+  background: var(--color-bg);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+.task-row-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.task-check {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.task-check.done {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.task-name.done {
+  text-decoration: line-through;
+  color: var(--color-text-secondary);
+}
+.task-time {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+/* ── Empty state ── */
+.planner-empty {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--color-text-secondary);
+}
+.planner-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+.planner-empty h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.35rem;
+}
+
+@media (max-width: 768px) {
+  .planner-grid {
+    grid-template-columns: 1fr;
+  }
+}
