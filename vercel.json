@@ -1,0 +1,6 @@
+{
+  "buildCommand": "npm --prefix learnozi-next run build",
+  "installCommand": "npm --prefix learnozi-next install",
+  "outputDirectory": "learnozi-next/.next",
+  "framework": "nextjs"
+}

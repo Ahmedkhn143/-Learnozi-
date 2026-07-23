@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
     },
-    "skipLibCheck": true,
-    "types": []
+    "skipLibCheck": true
   },
   "exclude": ["node_modules", ".next"]
 }

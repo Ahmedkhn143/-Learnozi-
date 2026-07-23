@@ -1,0 +1,9 @@
+{
+  "name": "learnozi-root",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix learnozi-next run dev",
+    "build": "npm --prefix learnozi-next run build",
+    "start": "npm --prefix learnozi-next run start"
+  }
+}
