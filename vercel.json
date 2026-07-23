@@ -1,5 +1,1 @@
-{
-  "buildCommand": "npm --prefix learnozi-frontend run build",
-  "installCommand": "npm --prefix learnozi-frontend install",
-  "framework": "nextjs"
-}
+{"framework": "nextjs"}
