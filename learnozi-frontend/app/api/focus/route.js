@@ -1,15 +1,14 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/db';
-import FocusSession from '@/lib/models/FocusSession';
+import { supabase } from '@/lib/supabase';
 import { getAuthUser } from '@/lib/auth';
+import crypto from 'crypto';
 
 export async function GET(req) {
   try {
     const user = await getAuthUser(req);
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    await connectDB();
-    const userId = user._id;
+    const userId = user.id;
     const now = new Date();
 
     const weekAgo = new Date(now);
@@ -18,22 +17,60 @@ export async function GET(req) {
     const todayStart = new Date(now);
     todayStart.setHours(0, 0, 0, 0);
 
-    const [weekSessions, todaySessions, totalSessions, history] = await Promise.all([
-      FocusSession.find({ user: userId, completedAt: { $gte: weekAgo }, completed: true }),
-      FocusSession.find({ user: userId, completedAt: { $gte: todayStart }, completed: true }),
-      FocusSession.countDocuments({ user: userId, completed: true }),
-      FocusSession.find({ user: userId, completed: true }).sort({ completedAt: -1 }).limit(20),
-    ]);
+    const { data: weekSessions, error: weekErr } = await supabase
+      .from('focus_sessions')
+      .select('duration_min')
+      .eq('user_id', userId)
+      .eq('completed', true)
+      .gte('completed_at', weekAgo.toISOString());
 
-    const weekMinutes = weekSessions.reduce((sum, s) => sum + s.durationMin, 0);
-    const todayMinutes = todaySessions.reduce((sum, s) => sum + s.durationMin, 0);
+    if (weekErr) throw weekErr;
+
+    const { data: todaySessions, error: todayErr } = await supabase
+      .from('focus_sessions')
+      .select('duration_min')
+      .eq('user_id', userId)
+      .eq('completed', true)
+      .gte('completed_at', todayStart.toISOString());
+
+    if (todayErr) throw todayErr;
+
+    const { count: totalSessions, error: countErr } = await supabase
+      .from('focus_sessions')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('completed', true);
+
+    if (countErr) throw countErr;
+
+    const { data: history, error: historyErr } = await supabase
+      .from('focus_sessions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('completed', true)
+      .order('completed_at', { ascending: false })
+      .limit(20);
+
+    if (historyErr) throw historyErr;
+
+    const weekMinutes = (weekSessions || []).reduce((sum, s) => sum + s.duration_min, 0);
+    const todayMinutes = (todaySessions || []).reduce((sum, s) => sum + s.duration_min, 0);
+
+    const formattedHistory = (history || []).map(h => ({
+      _id: h.id,
+      id: h.id,
+      subject: h.subject,
+      durationMin: h.duration_min,
+      completed: h.completed,
+      completedAt: h.completed_at
+    }));
 
     return NextResponse.json({
       todayMinutes,
       weekMinutes,
-      totalSessions,
-      weekSessionsCount: weekSessions.length,
-      sessions: history,
+      totalSessions: totalSessions || 0,
+      weekSessionsCount: (weekSessions || []).length,
+      sessions: formattedHistory,
     });
   } catch (error) {
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
@@ -45,22 +82,41 @@ export async function POST(req) {
     const user = await getAuthUser(req);
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    await connectDB();
     const { subject, durationMin, completed } = await req.json();
 
     if (!durationMin || durationMin < 1) {
       return NextResponse.json({ error: 'durationMin is required' }, { status: 400 });
     }
 
-    const session = await FocusSession.create({
-      user: user._id,
-      subject: subject || 'General',
-      durationMin,
-      completed: completed !== false,
-    });
+    const sessionId = crypto.randomUUID();
 
-    return NextResponse.json({ session }, { status: 201 });
+    const { data: session, error } = await supabase
+      .from('focus_sessions')
+      .insert({
+        id: sessionId,
+        user_id: user.id,
+        subject: subject || 'General',
+        duration_min: durationMin,
+        completed: completed !== false,
+        completed_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json({
+      session: {
+        _id: session.id,
+        id: session.id,
+        subject: session.subject,
+        durationMin: session.duration_min,
+        completed: session.completed,
+        completedAt: session.completed_at
+      }
+    }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }
+

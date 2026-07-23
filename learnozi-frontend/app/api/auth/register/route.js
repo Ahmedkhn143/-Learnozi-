@@ -1,38 +1,63 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/db';
-import User from '@/lib/models/User';
+import { supabase } from '@/lib/supabase';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 export async function POST(req) {
   try {
-    await connectDB();
     const { name, email, password } = await req.json();
 
     if (!email || !password || !name) {
       return NextResponse.json({ error: 'Name, email, and password are required' }, { status: 400 });
     }
 
-    const existing = await User.findOne({ email });
+    const { data: existing, error: checkError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email.toLowerCase())
+      .maybeSingle();
+
     if (existing) {
       return NextResponse.json({ error: 'Email already registered' }, { status: 409 });
     }
 
-    const user = await User.create({
-      name,
-      email,
-      password,
-      isVerified: true, // auto-verify for smooth dev & direct login
-      isOnboarded: false,
-    });
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const userId = crypto.randomUUID();
+
+    const { data: user, error: insertError } = await supabase
+      .from('users')
+      .insert({
+        id: userId,
+        name,
+        email: email.toLowerCase(),
+        password: hashedPassword,
+        academic_profile: {
+          educationLevel: null,
+          fieldOfStudy: '',
+          currentYear: '',
+          institution: '',
+        },
+        preferences: {
+          studyHoursPerDay: 4,
+          subjects: [],
+        },
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      throw insertError;
+    }
 
     return NextResponse.json(
       {
         message: 'Account created successfully!',
         user: {
-          id: user._id,
+          id: user.id,
           name: user.name,
           email: user.email,
-          isOnboarded: user.isOnboarded,
-          academicProfile: user.academicProfile,
+          isOnboarded: false,
+          academicProfile: user.academic_profile,
         },
       },
       { status: 201 }
