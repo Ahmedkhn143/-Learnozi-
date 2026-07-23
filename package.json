@@ -2,8 +2,8 @@
   "name": "learnozi-root",
   "private": true,
   "scripts": {
-    "dev": "npm --prefix learnozi-frontend run dev",
-    "build": "npm --prefix learnozi-frontend run build",
-    "start": "npm --prefix learnozi-frontend run start"
+    "dev": "cd learnozi-frontend && npm run dev",
+    "build": "cd learnozi-frontend && npm run build",
+    "start": "cd learnozi-frontend && npm run start"
   }
 }

@@ -1,5 +1,6 @@
 {
-  "buildCommand": "npm --prefix learnozi-frontend run build",
-  "installCommand": "npm --prefix learnozi-frontend install",
+  "buildCommand": "cd learnozi-frontend && npm run build",
+  "installCommand": "cd learnozi-frontend && npm install",
+  "outputDirectory": "learnozi-frontend/.next",
   "framework": "nextjs"
 }
