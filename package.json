@@ -5,5 +5,8 @@
     "dev": "cd learnozi-frontend && npm run dev",
     "build": "cd learnozi-frontend && npm run build",
     "start": "cd learnozi-frontend && npm run start"
+  },
+  "dependencies": {
+    "next": "16.2.11"
   }
 }
