@@ -56,43 +56,27 @@ export default function Dashboard() {
     setLoading(true);
     try {
       const headers = authHeaders();
-      const [focusRes, plansRes, aiRes, fcRes, historyRes, examsRes] = await Promise.allSettled([
-        axios.get(`${API}/api/focus/stats`,             { headers }),
-        axios.get(`${API}/api/plans?limit=50`,           { headers }),
-        axios.get(`${API}/api/ai/conversations?limit=5`, { headers }),
-        axios.get(`${API}/api/flashcards`,               { headers }),
-        axios.get(`${API}/api/focus/history?limit=3`,    { headers }),
-        axios.get(`${API}/api/exams`,                    { headers }),
+      // Only call API routes that actually exist in app/api/
+      const [focusRes, fcRes] = await Promise.allSettled([
+        axios.get(`${API}/api/focus`,       { headers }),
+        axios.get(`${API}/api/flashcards`,  { headers }),
       ]);
 
-      const focusStats      = focusRes.status      === 'fulfilled' ? focusRes.value.data        : null;
-      const plansData       = plansRes.status      === 'fulfilled' ? plansRes.value.data        : null;
-      const aiData          = aiRes.status         === 'fulfilled' ? aiRes.value.data           : null;
-      const fcData          = fcRes.status         === 'fulfilled' ? fcRes.value.data           : null;
-      const historyData     = historyRes.status    === 'fulfilled' ? historyRes.value.data      : null;
-      const examsData       = examsRes.status      === 'fulfilled' ? examsRes.value.data        : null;
-
-      const activePlans = plansData?.plans?.filter((p) => p.status === 'active').length ?? 0;
-
-      // Find next upcoming exam
-      let nextExam = null;
-      if (examsData?.exams) {
-        const upcoming = examsData.exams
-          .filter((e) => new Date(e.examDate) > new Date())
-          .sort((a, b) => new Date(a.examDate) - new Date(b.examDate));
-        if (upcoming.length > 0) {
-          nextExam = upcoming[0];
-        }
-      }
+      const focusData = focusRes.status === 'fulfilled' ? focusRes.value.data : null;
+      const fcData    = fcRes.status    === 'fulfilled' ? fcRes.value.data    : null;
 
       setData({
-        focusStats,
-        activePlans,
-        aiConversations: aiData?.total ?? 0,
+        focusStats: focusData ? {
+          weekMinutes: focusData.weekMinutes ?? 0,
+          todayMinutes: focusData.todayMinutes ?? 0,
+          streak: 0,
+        } : null,
+        activePlans: 0,
+        aiConversations: 0,
         flashcardSets:   fcData?.sets?.length ?? 0,
-        recentSessions:  historyData?.sessions ?? [],
-        recentConvos:    aiData?.conversations ?? [],
-        nextExam,
+        recentSessions:  focusData?.sessions ?? [],
+        recentConvos:    [],
+        nextExam: null,
       });
     } finally {
       setLoading(false);

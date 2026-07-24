@@ -40,7 +40,7 @@ function ReviewMode({ set, onBack, onUpdateCard }) {
   const progress = Math.round((index / cards.length) * 100);
 
   const handleAnswer = async (status) => {
-    await onUpdateCard(set._id, current._id, status);
+    await onUpdateCard(set.id, current.id, status);
     if (status === 'known') setStats((s) => ({ ...s, known: s.known + 1 }));
     else setStats((s) => ({ ...s, learning: s.learning + 1 }));
 
@@ -153,7 +153,7 @@ export default function Flashcards() {
       );
       setSets((prev) => [
         {
-          id: data.set._id,
+          id: data.set.id || data.set._id,
           title: data.set.title,
           subject: data.set.subject,
           cardCount: data.set.cards.length,

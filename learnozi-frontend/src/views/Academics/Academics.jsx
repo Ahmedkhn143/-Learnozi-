@@ -119,7 +119,7 @@ export default function Academics() {
       const { data } = await axios.post(`${API}/api/academics/${activeSemesterId}/courses`, courseForm, { headers: authHeaders() });
       
       setSemesters(semesters.map(sem => {
-        if (sem._id === activeSemesterId) {
+        if ((sem.id || sem._id) === activeSemesterId) {
           return { ...sem, courses: [...sem.courses, data.course] };
         }
         return sem;
@@ -137,8 +137,8 @@ export default function Academics() {
       const { data } = await axios.put(`${API}/api/academics/courses/${courseId}`, { actualGrade: newGrade }, { headers: authHeaders() });
       
       setSemesters(semesters.map(sem => {
-        if (sem._id === semId) {
-          return { ...sem, courses: sem.courses.map(c => c._id === courseId ? data.course : c) };
+        if ((sem.id || sem._id) === semId) {
+          return { ...sem, courses: sem.courses.map(c => (c.id || c._id) === courseId ? data.course : c) };
         }
         return sem;
       }));
@@ -152,7 +152,7 @@ export default function Academics() {
     if (!window.confirm('Delete semester and all its courses?')) return;
     try {
       await axios.delete(`${API}/api/academics/${id}`, { headers: authHeaders() });
-      setSemesters(semesters.filter(s => s._id !== id));
+      setSemesters(semesters.filter(s => (s.id || s._id) !== id));
       success('Semester deleted');
     } catch (err) {
       error('Failed to delete');
@@ -207,7 +207,7 @@ export default function Academics() {
           </div>
         ) : (
           semesters.map(sem => (
-            <div key={sem._id} className="semester-card card">
+            <div key={sem.id || sem._id} className="semester-card card">
               <div className="semester-header">
                 <div>
                   <h3>{sem.name}</h3>
@@ -217,7 +217,7 @@ export default function Academics() {
                 </div>
                 <div className="semester-actions">
                   <span className="sgpa-badge">SGPA: {calculateSGPA(sem.courses)}</span>
-                  <button className="btn btn-ghost" onClick={() => deleteSemester(sem._id)}>🗑️</button>
+                  <button className="btn btn-ghost" onClick={() => deleteSemester(sem.id || sem._id)}>🗑️</button>
                 </div>
               </div>
 
@@ -237,7 +237,7 @@ export default function Academics() {
                       <tr><td colSpan="5" className="text-center">No courses added yet.</td></tr>
                     ) : (
                       sem.courses.map(course => (
-                        <tr key={course._id}>
+                        <tr key={course.id || course._id}>
                           <td><strong>{course.code}</strong></td>
                           <td>{course.name}</td>
                           <td>{course.creditHours}</td>
@@ -246,7 +246,7 @@ export default function Academics() {
                             <select 
                               className="grade-select"
                               value={course.actualGrade || ''} 
-                              onChange={(e) => updateCourseGrade(sem._id, course._id, e.target.value)}
+                              onChange={(e) => updateCourseGrade(sem.id || sem._id, course.id || course._id, e.target.value)}
                             >
                               <option value="">Pending</option>
                               {Object.keys(GRADE_POINTS).map(g => <option key={g} value={g}>{g}</option>)}
@@ -262,7 +262,7 @@ export default function Academics() {
               <button 
                 className="btn btn-outline" 
                 style={{ width: '100%', marginTop: '1rem' }}
-                onClick={() => openCourseModal(sem._id)}
+                onClick={() => openCourseModal(sem.id || sem._id)}
               >
                 + Add Course
               </button>
