@@ -1,12 +1,12 @@
 {
-  "name": "learnozi-root",
-  "private": true,
-  "scripts": {
-    "dev": "cd learnozi-frontend && npm run dev",
-    "build": "cd learnozi-frontend && npm run build",
-    "start": "cd learnozi-frontend && npm run start"
-  },
-  "dependencies": {
-    "next": "16.2.11"
-  }
+    "name": "learnozi-root",
+    "private": true,
+    "scripts": {
+          "dev": "next dev",
+          "build": "next build",
+          "start": "next start"
+    },
+    "dependencies": {
+          "next": "16.2.11"
+    }
 }
