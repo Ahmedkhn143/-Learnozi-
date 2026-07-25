@@ -3,12 +3,15 @@ import { supabase } from '@/lib/supabase';
 import { getAuthUser } from '@/lib/auth';
 import crypto from 'crypto';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req, { params }) {
   try {
     const user = await getAuthUser(req);
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const semesterId = params.id;
+    const resolvedParams = await params;
+    const semesterId = resolvedParams.id;
     const { name, code, creditHours, targetGrade, actualGrade } = await req.json();
 
     if (!name || !creditHours) {
