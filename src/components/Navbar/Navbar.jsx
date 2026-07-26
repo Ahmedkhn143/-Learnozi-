@@ -63,26 +63,39 @@ export default function Navbar() {
         )}
       </div>
 
-      <button className="navbar-hamburger" onClick={() => setMenuOpen((o) => !o)} aria-label="Menu">
+      <button 
+        className={`navbar-hamburger ${menuOpen ? 'is-active' : ''}`} 
+        onClick={() => setMenuOpen((o) => !o)} 
+        aria-label="Menu"
+        aria-expanded={menuOpen}
+      >
         <span /><span /><span />
       </button>
 
       {menuOpen && (
         <div className="navbar-mobile-drawer">
+          {user && (
+            <Link to="/profile" className="navbar-mobile-user" onClick={close}>
+              <span className="user-icon">👤</span>
+              <span className="user-name">{user.name}</span>
+            </Link>
+          )}
           {links.map((l) => (
             <NavLink key={l.to} to={l.to} end={l.end} onClick={close}>{l.label}</NavLink>
           ))}
           <div className="navbar-mobile-divider" />
-          <button className="btn btn-ghost" onClick={toggleLanguage} style={{ width: '100%', textAlign: 'left', fontWeight: 'bold' }}>
-            Switch Language: {language === 'en' ? 'UR' : 'EN'}
+          <button className="btn btn-ghost" onClick={toggleLanguage} style={{ width: '100%', justifyContent: 'flex-start', fontWeight: 'bold' }}>
+            🌐 Language: {language === 'en' ? 'English (EN)' : 'Urdu (UR)'}
           </button>
           {user ? (
-            <button className="btn btn-ghost" onClick={() => { handleLogout(); close(); }}>{t('nav.logout')}</button>
+            <button className="btn btn-ghost danger-text" onClick={() => { handleLogout(); close(); }} style={{ width: '100%', justifyContent: 'flex-start' }}>
+              🚪 {t('nav.logout')}
+            </button>
           ) : (
-            <>
+            <div className="mobile-auth-btns">
               <Link to="/login" className="btn btn-ghost" onClick={close}>{t('nav.login')}</Link>
               <Link to="/signup" className="btn btn-primary" onClick={close}>{t('nav.signup')}</Link>
-            </>
+            </div>
           )}
         </div>
       )}
