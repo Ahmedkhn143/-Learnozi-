@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import './Landing.css';
 
 export default function Landing() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('explainer');
 
   const featureTabs = [
@@ -71,8 +73,16 @@ Streak:  🔥 7 Days Consecutive Focus`
           <a href="#testimonials">Testimonials</a>
         </div>
         <div className="landing-nav-actions">
-          <Link to="/login" className="btn btn-ghost">Sign In</Link>
-          <Link to="/signup" className="btn btn-primary btn-sm">Get Started Free</Link>
+          {user ? (
+            <Link to="/dashboard" className="btn btn-primary btn-sm">
+              <span>Go to Dashboard →</span>
+            </Link>
+          ) : (
+            <>
+              <Link to="/login" className="btn btn-ghost">Sign In</Link>
+              <Link to="/signup" className="btn btn-primary btn-sm">Get Started Free</Link>
+            </>
+          )}
         </div>
       </nav>
 
@@ -93,12 +103,25 @@ Streak:  🔥 7 Days Consecutive Focus`
         </p>
 
         <div className="hero-cta-group animate-fade-in">
-          <Link to="/signup" className="btn btn-primary btn-lg">
-            <span>🚀 Start Learning Now</span>
-          </Link>
-          <Link to="/login" className="btn btn-secondary btn-lg">
-            <span>⚡ Quick Demo Access</span>
-          </Link>
+          {user ? (
+            <>
+              <Link to="/dashboard" className="btn btn-primary btn-lg">
+                <span>🚀 Open My Dashboard</span>
+              </Link>
+              <Link to="/ai-explainer" className="btn btn-secondary btn-lg">
+                <span>✨ Launch AI Studio</span>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link to="/signup" className="btn btn-primary btn-lg">
+                <span>🚀 Start Learning Now</span>
+              </Link>
+              <Link to="/login" className="btn btn-secondary btn-lg">
+                <span>⚡ Quick Demo Access</span>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Stats Counter Bar */}

@@ -25,8 +25,8 @@ export default function App() {
   return (
     <ErrorBoundary>
       <Routes>
-        {/* Landing page — guests only */}
-        <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
+        {/* Landing page — accessible to all */}
+        <Route path="/" element={<Landing />} />
 
         {/* Auth pages — guests only */}
         <Route path="/login"  element={<PublicRoute><Login /></PublicRoute>} />
