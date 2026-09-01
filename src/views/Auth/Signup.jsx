@@ -13,6 +13,7 @@ export default function Signup() {
   const [name, setName]         = useState('');
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors]     = useState({});
   const [serverError, setServerError] = useState('');
   const [loading, setLoading]   = useState(false);
@@ -92,7 +93,7 @@ export default function Signup() {
       <div className="card auth-card">
         <div className="auth-header">
           <Link to="/" className="auth-logo">L</Link>
-          <h2>Account banao</h2>
+          <h2>Account banao ✨</h2>
           <p>AI ke saath smarter study shuru karo</p>
         </div>
 
@@ -101,34 +102,52 @@ export default function Signup() {
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className="form-group">
             <label>Poora Naam</label>
-            <input
-              type="text" value={name}
-              onChange={(e) => { setName(e.target.value); clearErr('name'); }}
-              placeholder="Tera naam"
-              className={errors.name ? 'input-error' : ''}
-            />
+            <div className="input-with-icon">
+              <span className="input-icon">👤</span>
+              <input
+                type="text" value={name}
+                onChange={(e) => { setName(e.target.value); clearErr('name'); }}
+                placeholder="Tera naam"
+                className={errors.name ? 'input-error' : ''}
+              />
+            </div>
             {errors.name && <span className="field-error">{errors.name}</span>}
           </div>
 
           <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email" value={email}
-              onChange={(e) => { setEmail(e.target.value); clearErr('email'); }}
-              placeholder="you@example.com"
-              className={errors.email ? 'input-error' : ''}
-            />
+            <label>Email Address</label>
+            <div className="input-with-icon">
+              <span className="input-icon">✉️</span>
+              <input
+                type="email" value={email}
+                onChange={(e) => { setEmail(e.target.value); clearErr('email'); }}
+                placeholder="you@example.com"
+                className={errors.email ? 'input-error' : ''}
+              />
+            </div>
             {errors.email && <span className="field-error">{errors.email}</span>}
           </div>
 
           <div className="form-group">
             <label>Password</label>
-            <input
-              type="password" value={password}
-              onChange={(e) => { setPassword(e.target.value); clearErr('password'); }}
-              placeholder="Kam az kam 6 characters"
-              className={errors.password ? 'input-error' : ''}
-            />
+            <div className="input-with-icon">
+              <span className="input-icon">🔒</span>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); clearErr('password'); }}
+                placeholder="Kam az kam 6 characters"
+                className={errors.password ? 'input-error' : ''}
+              />
+              <button
+                type="button"
+                className="input-toggle-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label="Toggle password visibility"
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
             {errors.password && <span className="field-error">{errors.password}</span>}
             {password && password.length >= 6 && (
               <span className="field-success">✓ Password theek hai</span>

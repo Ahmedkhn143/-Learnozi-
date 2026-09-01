@@ -16,6 +16,18 @@ export function AuthProvider({ children }) {
       return;
     }
 
+    if (token === 'demo-mock-jwt-token-12345') {
+      setUser({
+        id: 'demo_user_123',
+        name: 'Demo Student',
+        email: 'demo@learnozi.com',
+        isOnboarded: true,
+        academicProfile: { educationLevel: 'University', university: 'NUST' }
+      });
+      setLoading(false);
+      return;
+    }
+
     axios
       .get(`${API_URL}/api/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },

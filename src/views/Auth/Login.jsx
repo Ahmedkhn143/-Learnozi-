@@ -13,6 +13,7 @@ function validateEmail(email) {
 export default function Login() {
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors]     = useState({});
   const [serverError, setServerError] = useState('');
   const [needsVerification, setNeedsVerification] = useState(false);
@@ -72,7 +73,7 @@ export default function Login() {
       <div className="card auth-card">
         <div className="auth-header">
           <Link to="/" className="auth-logo">L</Link>
-          <h2>Wapas aao!</h2>
+          <h2>Wapas aao! 👋</h2>
           <p>Apne Learnozi account mein sign in karo</p>
         </div>
 
@@ -85,24 +86,39 @@ export default function Login() {
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email" value={email}
-              onChange={(e) => { setEmail(e.target.value); field('email').onChange(); }}
-              placeholder="you@example.com"
-              className={errors.email ? 'input-error' : ''}
-            />
+            <label>Email Address</label>
+            <div className="input-with-icon">
+              <span className="input-icon">✉️</span>
+              <input
+                type="email" value={email}
+                onChange={(e) => { setEmail(e.target.value); field('email').onChange(); }}
+                placeholder="you@example.com"
+                className={errors.email ? 'input-error' : ''}
+              />
+            </div>
             {errors.email && <span className="field-error">{errors.email}</span>}
           </div>
 
           <div className="form-group">
             <label>Password</label>
-            <input
-              type="password" value={password}
-              onChange={(e) => { setPassword(e.target.value); field('password').onChange(); }}
-              placeholder="••••••••"
-              className={errors.password ? 'input-error' : ''}
-            />
+            <div className="input-with-icon">
+              <span className="input-icon">🔒</span>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); field('password').onChange(); }}
+                placeholder="••••••••"
+                className={errors.password ? 'input-error' : ''}
+              />
+              <button
+                type="button"
+                className="input-toggle-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label="Toggle password visibility"
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
+            </div>
             {errors.password && <span className="field-error">{errors.password}</span>}
           </div>
 
@@ -115,11 +131,10 @@ export default function Login() {
           </button>
         </form>
 
-        <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+        <div style={{ marginTop: '1.25rem', textAlign: 'center' }}>
           <button 
             type="button" 
-            className="btn btn-ghost" 
-            style={{ width: '100%', background: '#eef2ff', color: '#4f46e5', borderColor: '#c7d2fe', fontWeight: 'bold' }}
+            className="btn btn-ghost demo-login-btn" 
             onClick={() => {
               login('demo-mock-jwt-token-12345', {
                 id: 'demo_user_123',
