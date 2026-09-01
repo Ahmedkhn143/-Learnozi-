@@ -1,295 +1,215 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import './Landing.css';
 
 export default function Landing() {
-  const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('explainer');
-
-  const featureTabs = [
-    {
-      id: 'explainer',
-      label: '✨ AI Explainer Studio',
-      title: 'Simplify Complex Topics Instantly',
-      desc: 'Stuck on tough Quantum Mechanics, Organic Chemistry, or Calculus? Ask our AI Explainer in plain language to break down concepts into 5-year-old summaries or university-level deep dives.',
-      badge: 'Interactive AI Chat',
-      previewCode: `> USER: Explain Bayes' Theorem with a real-life example
-> AI EXPLAINER: Imagine you are testing for a rare medical condition...
-P(A|B) = [P(B|A) * P(A)] / P(B)
-Key takeaway: Always update your belief when new evidence comes in!`
-    },
-    {
-      id: 'flashcards',
-      label: '🃏 Smart 3D Flashcards',
-      title: 'Active Recall & Spaced Repetition',
-      desc: 'Generate interactive 3D flashcards automatically from your course syllabus or notes. Rate your confidence level to optimize memory retention before exam day.',
-      badge: '3D Flip Engine',
-      previewCode: `Q: What is the main function of Mitochondria?
-[ Click Card to Flip 🔄 ]
-A: Mitochondria generate most of the chemical energy (ATP) needed to power the cell's biochemical reactions!`
-    },
-    {
-      id: 'planner',
-      label: '📅 AI Study Planner',
-      title: 'Automated Exam Countdown & Schedules',
-      desc: 'Input your upcoming exam dates and target grades. Learnozi calculates optimal daily study hours and distributes subject tasks across your calendar automatically.',
-      badge: 'Smart Timetable',
-      previewCode: `Upcoming Exam: Organic Chemistry (In 4 Days)
-Daily Target: 2.5 Hours Focus
-Status: [====================>] 85% Prepared`
-    },
-    {
-      id: 'focus',
-      label: '⏱️ Ambient Focus Room',
-      title: 'Pomodoro Timer with Lo-Fi & Rain Soundscapes',
-      desc: 'Eliminate distractions with integrated focus timer intervals, ambient binaural beats, soundscapes, and focus streak tracking log.',
-      badge: 'Deep Focus',
-      previewCode: `Focus Session: 25:00 Remaining
-Soundscape: 🌧️ Gentle Rain + Lo-Fi Beats
-Streak:  🔥 7 Days Consecutive Focus`
-    }
-  ];
-
-  const currentTab = featureTabs.find(t => t.id === activeTab);
+  const { t, language, toggleLanguage } = useLanguage();
 
   return (
-    <div className="landing-page">
-      {/* Background Ambient Glows */}
-      <div className="glow-ambient glow-purple" style={{ top: '-10%', left: '20%', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%)' }} />
-      <div className="glow-ambient glow-cyan" style={{ top: '30%', right: '10%', width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(6,182,212,0.2) 0%, transparent 70%)' }} />
+    <div className="landing">
 
-      {/* Landing Top Header */}
-      <nav className="landing-nav">
-        <div className="landing-brand">
-          <div className="brand-icon-wrap">
-            <span className="brand-icon">L</span>
-          </div>
-          <span className="brand-name">Learnozi</span>
-        </div>
-        <div className="landing-nav-links">
-          <a href="#features">Features</a>
-          <a href="#demo">AI Preview</a>
-          <a href="#testimonials">Testimonials</a>
-        </div>
-        <div className="landing-nav-actions">
-          {user ? (
-            <Link to="/dashboard" className="btn btn-primary btn-sm">
-              <span>Go to Dashboard →</span>
-            </Link>
-          ) : (
-            <>
-              <Link to="/login" className="btn btn-ghost">Sign In</Link>
-              <Link to="/signup" className="btn btn-primary btn-sm">Get Started Free</Link>
-            </>
-          )}
+      {/* NAV */}
+      <nav className="ln-nav">
+        <div className="ln-logo">Learn<span>ozi</span></div>
+        <div className="ln-nav-links">
+          <a href="#features">{t('nav.features')}</a>
+          <a href="#compare">{t('nav.why_learnozi')}</a>
+          <Link to="/login" className="ln-btn-ghost">{t('nav.login')}</Link>
+          <Link to="/signup" className="ln-btn-primary">{t('nav.signup')}</Link>
+          <button 
+            className="ln-btn-ghost" 
+            onClick={toggleLanguage} 
+            style={{ fontWeight: 'bold' }}>
+            {language === 'en' ? 'UR' : 'EN'}
+          </button>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <header className="hero-section">
-        <div className="hero-badge animate-fade-in">
-          <span className="badge-sparkle">✨</span>
-          <span>NEXT-GEN AI STUDY & PRODUCTIVITY SUITE</span>
-        </div>
-
-        <h1 className="hero-title animate-fade-in">
-          Study 10x Faster with <br />
-          <span className="gradient-text">AI-Powered Intelligence</span>
-        </h1>
-
-        <p className="hero-subtitle animate-fade-in">
-          Master any subject, auto-generate 3D flashcards, chat with uploaded PDF documents, track focus sessions, and ace your exams effortlessly.
-        </p>
-
-        <div className="hero-cta-group animate-fade-in">
-          {user ? (
-            <>
-              <Link to="/dashboard" className="btn btn-primary btn-lg">
-                <span>🚀 Open My Dashboard</span>
-              </Link>
-              <Link to="/ai-explainer" className="btn btn-secondary btn-lg">
-                <span>✨ Launch AI Studio</span>
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link to="/signup" className="btn btn-primary btn-lg">
-                <span>🚀 Start Learning Now</span>
-              </Link>
-              <Link to="/login" className="btn btn-secondary btn-lg">
-                <span>⚡ Quick Demo Access</span>
-              </Link>
-            </>
-          )}
-        </div>
-
-        {/* Stats Counter Bar */}
-        <div className="hero-stats-bar glass-card">
-          <div className="stat-item">
-            <span className="stat-number">50,000+</span>
-            <span className="stat-label">Flashcards Generated</span>
+      {/* HERO */}
+      <section className="ln-hero">
+        <div className="ln-hero-content">
+          <div className="ln-badge">
+            <span className="ln-badge-dot" />
+            {t('landing.badge')}
           </div>
-          <div className="stat-divider" />
-          <div className="stat-item">
-            <span className="stat-number">98.4%</span>
-            <span className="stat-label">Exam Pass Rate</span>
+          <h1>{t('landing.hero_title_1')}<br /><em>{t('landing.hero_title_2')}</em></h1>
+          <p className="ln-sub">{t('landing.hero_sub')}</p>
+          <p className="ln-urdu">{t('landing.hero_urdu')}</p>
+          <div className="ln-cta">
+            <Link to="/signup" className="ln-btn-primary ln-btn-lg">
+              {t('landing.btn_signup')}
+            </Link>
+            <a href="#features" className="ln-btn-text">{t('landing.btn_how')}</a>
           </div>
-          <div className="stat-divider" />
-          <div className="stat-item">
-            <span className="stat-number">12,000+</span>
-            <span className="stat-label">Active Learners</span>
-          </div>
-        </div>
-      </header>
-
-      {/* Interactive App Mockup Showcase */}
-      <section className="app-preview-section" id="demo">
-        <div className="section-header text-center">
-          <span className="badge badge-cyan">INTERACTIVE DEMO</span>
-          <h2>Explore Learnozi AI Features</h2>
-          <p>Experience the all-in-one workspace designed specifically for high-achieving students.</p>
+          <p className="ln-note">{t('landing.note_free')}</p>
         </div>
 
-        <div className="preview-container glass-card">
-          {/* Feature Selector Tabs */}
-          <div className="preview-tabs">
-            {featureTabs.map((tab) => (
-              <button
-                key={tab.id}
-                className={`preview-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                {tab.label}
-              </button>
+        <div className="ln-hero-card">
+          <div className="ln-card-header">
+            <div className="ln-avatar">🤖</div>
+            <div>
+              <div className="ln-ai-name">{t('landing.ai_bot_name')}</div>
+              <div className="ln-ai-status">{t('landing.ai_bot_status')}</div>
+            </div>
+          </div>
+          <div className="ln-msg ln-msg-user">{t('landing.ai_msg_user')}</div>
+          <div className="ln-msg ln-msg-ai">
+            {t('landing.ai_msg_reply').split('\n').map((line, i) => (
+              <span key={i}>{line}<br /></span>
             ))}
           </div>
+          <div className="ln-typing">
+            <span /><span /><span />
+          </div>
+          {/* Floating badges */}
+          <div className="ln-float-badge ln-float-streak">🔥 7 din ki streak!</div>
+          <div className="ln-float-badge ln-float-progress">
+            <div style={{fontSize:'0.72rem',color:'#64748b',marginBottom:'4px'}}>Physics Progress</div>
+            <div className="ln-prog-bar"><div className="ln-prog-fill" /></div>
+            <div style={{fontSize:'0.72rem',color:'#4f46e5',marginTop:'3px',fontWeight:600}}>78%</div>
+          </div>
+        </div>
+      </section>
 
-          {/* Interactive Feature Display */}
-          <div className="preview-body grid-2">
-            <div className="preview-info">
-              <span className="badge badge-primary mb-2">{currentTab.badge}</span>
-              <h3>{currentTab.title}</h3>
-              <p>{currentTab.desc}</p>
-              <Link to="/signup" className="btn btn-accent btn-sm mt-3">
-                Try {currentTab.label} →
-              </Link>
+      {/* STATS */}
+      <div className="ln-stats">
+        <div className="ln-stat"><div className="ln-stat-num">6</div><div className="ln-stat-label">{t('landing.stats.ai')}</div></div>
+        <div className="ln-stat"><div className="ln-stat-num">{language === 'en' ? 'EN|UR' : 'Urdu'}</div><div className="ln-stat-label">{t('landing.stats.lang')}</div></div>
+        <div className="ln-stat"><div className="ln-stat-num">Free</div><div className="ln-stat-label">{t('landing.stats.plan')}</div></div>
+        <div className="ln-stat"><div className="ln-stat-num">24/7</div><div className="ln-stat-label">{t('landing.stats.tutor')}</div></div>
+      </div>
+
+      {/* FEATURES */}
+      <section className="ln-features" id="features">
+        <div className="ln-section-tag">FEATURES</div>
+        <h2 className="ln-section-title" dangerouslySetInnerHTML={{ __html: t('landing.feat_subtitle') }}></h2>
+        <p className="ln-section-sub">{t('landing.feat_desc')}</p>
+
+        <div className="ln-features-grid">
+          {[
+            { icon: '🧠', title: t('landing.features_list.1.title'), desc: t('landing.features_list.1.desc'), tag: 'FREE' },
+            { icon: '🃏', title: t('landing.features_list.2.title'), desc: t('landing.features_list.2.desc'), tag: 'FREE' },
+            { icon: '⏱️', title: t('landing.features_list.3.title'), desc: t('landing.features_list.3.desc'), tag: 'FREE' },
+            { icon: '📅', title: t('landing.features_list.4.title'), desc: t('landing.features_list.4.desc'), tag: 'FREE' },
+            { icon: '📊', title: t('landing.features_list.5.title'), desc: t('landing.features_list.5.desc'), tag: 'FREE' },
+            { icon: '🇵🇰', title: t('landing.features_list.6.title'), desc: t('landing.features_list.6.desc'), tag: 'FREE' },
+          ].map((f) => (
+            <div key={f.title} className="ln-feature-card">
+              <div className="ln-feature-icon">{f.icon}</div>
+              <div className="ln-feature-title">{f.title}</div>
+              <div className="ln-feature-desc">{f.desc}</div>
+              <span className="ln-feature-tag">{f.tag}</span>
             </div>
+          ))}
+        </div>
+      </section>
 
-            <div className="preview-screen-box">
-              <div className="window-bar">
-                <span className="dot red" /><span className="dot yellow" /><span className="dot green" />
-                <span className="window-title">learnozi-ai-studio // {currentTab.id}</span>
+      {/* HOW IT WORKS */}
+      <section className="ln-how">
+        <div className="ln-section-tag">HOW IT WORKS</div>
+        <h2 className="ln-section-title">{t('landing.how_title')}</h2>
+        <div className="ln-steps">
+          {[
+            { n: '1', title: t('landing.how_steps.1.title'), desc: t('landing.how_steps.1.desc') },
+            { n: '2', title: t('landing.how_steps.2.title'), desc: t('landing.how_steps.2.desc') },
+            { n: '3', title: t('landing.how_steps.3.title'), desc: t('landing.how_steps.3.desc') },
+          ].map((s, i) => (
+            <div key={i} className="ln-step">
+              <div className={`ln-step-num${i === 0 ? ' active' : ''}`}>{s.n}</div>
+              <div className="ln-step-title">{s.title}</div>
+              <div className="ln-step-desc">{s.desc}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* COMPARISON */}
+      <section className="ln-compare" id="compare">
+        <div className="ln-section-tag">WHY LEARNOZI</div>
+        <h2 className="ln-section-title">{t('landing.compare_title')}</h2>
+        <table className="ln-table">
+          <thead>
+            <tr>
+              <th style={{textAlign:'left'}}>Feature</th>
+              <th className="ln-th-highlight">Learnozi</th>
+              <th>ChatGPT</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              [t('landing.compare_rows.1'), '✓', t('landing.compare_partial')],
+              [t('landing.compare_rows.2'), '✓', '✗'],
+              [t('landing.compare_rows.3'), '✓', '✗'],
+              [t('landing.compare_rows.4'), '✓', '✗'],
+              [t('landing.compare_rows.5'), '✓', '✗'],
+              [t('landing.compare_rows.6'), '✓', '✗'],
+              [t('landing.compare_rows.7'), '✓', '✓'],
+            ].map(([feat, l, c]) => (
+              <tr key={feat}>
+                <td className="ln-td-feat">{feat}</td>
+                <td className="ln-td-check">{l}</td>
+                <td className="ln-td-cross">{c}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className="ln-testimonials">
+        <div className="ln-section-tag">STUDENT STORIES</div>
+        <h2 className="ln-section-title">Loved by Students Across Pakistan 🇵🇰</h2>
+        <div className="ln-testimonials-grid">
+          <div className="ln-testimonial-card">
+            <p>"Learnozi helped me calculate my semester target GPA and prepare flashcards for my FAST entry test!"</p>
+            <div className="ln-test-author">
+              <div className="ln-avatar">👨‍🎓</div>
+              <div>
+                <strong>Ali Raza</strong>
+                <span>FAST NUCES, CS</span>
               </div>
-              <pre className="screen-code-content">
-                <code>{currentTab.previewCode}</code>
-              </pre>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section className="features-section" id="features">
-        <div className="section-header text-center">
-          <span className="badge badge-primary">POWERFUL TOOLKIT</span>
-          <h2>Everything You Need To Top Your Class</h2>
-        </div>
-
-        <div className="grid-3 mt-4">
-          <div className="glass-card glass-card-hover feature-card">
-            <div className="feature-icon">✨</div>
-            <h3>AI Explainer Studio</h3>
-            <p>Convert lengthy textbook chapters into structured summaries, key bullet points, and instant Q&A breakdowns.</p>
-          </div>
-
-          <div className="glass-card glass-card-hover feature-card">
-            <div className="feature-icon">📄</div>
-            <h3>Document & PDF Chat</h3>
-            <p>Upload lecture slides, research papers, and notes. Chat directly with your documents with page citations.</p>
-          </div>
-
-          <div className="glass-card glass-card-hover feature-card">
-            <div className="feature-icon">🃏</div>
-            <h3>3D Interactive Flashcards</h3>
-            <p>Smart active recall flashcards with spaced repetition difficulty scoring (Easy, Good, Hard).</p>
-          </div>
-
-          <div className="glass-card glass-card-hover feature-card">
-            <div className="feature-icon">📅</div>
-            <h3>Study Timetable & Planner</h3>
-            <p>Automated study schedule creation based on your exam dates, priority tags, and study goals.</p>
-          </div>
-
-          <div className="glass-card glass-card-hover feature-card">
-            <div className="feature-icon">⏱️</div>
-            <h3>Pomodoro Focus Room</h3>
-            <p>Custom focus timers bundled with ambient Lofi beats, rain soundscapes, and streak counters.</p>
-          </div>
-
-          <div className="glass-card glass-card-hover feature-card">
-            <div className="feature-icon">🌍</div>
-            <h3>Peer Study Community</h3>
-            <p>Connect with fellow learners, exchange notes, post exam queries, and collaborate in public study groups.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="testimonials-section" id="testimonials">
-        <div className="section-header text-center">
-          <span className="badge badge-cyan">STUDENT TESTIMONIALS</span>
-          <h2>Loved By Learners Worldwide</h2>
-        </div>
-
-        <div className="grid-3 mt-4">
-          <div className="glass-card testimonial-card">
-            <p>"Learnozi transformed how I prepare for my medical exams. The AI Explainer simplified complex Physiology topics in minutes!"</p>
-            <div className="testimonial-user mt-3">
-              <div className="avatar">A</div>
+          <div className="ln-testimonial-card">
+            <p>"Roman Urdu AI explainations are super clear! Concept samjhna ab bohot easy ho gaya hai."</p>
+            <div className="ln-test-author">
+              <div className="ln-avatar">👩‍🎓</div>
               <div>
                 <strong>Ayesha Khan</strong>
-                <p>Pre-Med Student</p>
+                <span>NUST, Electrical Eng</span>
               </div>
             </div>
           </div>
-
-          <div className="glass-card testimonial-card">
-            <p>"The 3D flashcards and ambient rain timer kept me focused for 4+ hours straight. Got an A in Organic Chemistry thanks to this!"</p>
-            <div className="testimonial-user mt-3">
-              <div className="avatar" style={{ background: '#06b6d4' }}>M</div>
+          <div className="ln-testimonial-card">
+            <p>"The Document Chat feature saved me hours during exam preparation by summarizing 50 page PDFs."</p>
+            <div className="ln-test-author">
+              <div className="ln-avatar">🎓</div>
               <div>
-                <strong>Muhammad Ali</strong>
-                <p>Engineering Major</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card testimonial-card">
-            <p>"Document chat is a lifesaver! I dropped a 60-page PDF slide deck and it answered all my revision questions with exact page references."</p>
-            <div className="testimonial-user mt-3">
-              <div className="avatar" style={{ background: '#ec4899' }}>S</div>
-              <div>
-                <strong>Sara Ahmed</strong>
-                <p>Computer Science Senior</p>
+                <strong>Hamza Ahmed</strong>
+                <span>LUMS, Business</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Call to Action Footer */}
-      <footer className="landing-cta-footer">
-        <div className="glass-card cta-banner text-center">
-          <h2>Ready To Supercharge Your Learning?</h2>
-          <p>Join thousands of students achieving top grades with Learnozi today.</p>
-          <div className="mt-4">
-            <Link to="/signup" className="btn btn-primary btn-lg">
-              🚀 Create Your Free Account
-            </Link>
-          </div>
-          <p className="mt-3 text-muted" style={{ fontSize: '0.8rem' }}>No credit card required. Free instant access.</p>
+      {/* CTA */}
+      <section className="ln-cta-section">
+        <h2>{t('landing.cta_title')}</h2>
+        <p>{t('landing.cta_sub')}</p>
+        <Link to="/signup" className="ln-btn-white">{t('landing.cta_btn')}</Link>
+        <p className="ln-cta-note">{t('landing.cta_note')}</p>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="ln-footer">
+        <div className="ln-footer-logo">Learnozi</div>
+        <div className="ln-footer-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="mailto:hello@learnozi.com">Contact</a>
         </div>
+        <div>Made in Pakistan 🇵🇰</div>
       </footer>
     </div>
   );
