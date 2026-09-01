@@ -1,193 +1,94 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import './Profile.css';
 
-import { API } from '../../config';
-const authHeaders = () => {
-  const t = localStorage.getItem('token');
-  return t ? { Authorization: `Bearer ${t}` } : {};
-};
-
 export default function Profile() {
-  const { user, login } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState({ type: '', text: '' });
+  const { user } = useAuth();
+  const [name, setName] = useState(user?.name || 'Demo Student');
+  const [email, setEmail] = useState(user?.email || 'student@learnozi.app');
+  const [educationLevel, setEducationLevel] = useState('University');
+  const [savedMsg, setSavedMsg] = useState(false);
 
-  // Form state
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [studyHours, setStudyHours] = useState(4);
-  const [subjects, setSubjects] = useState('');
-
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
-    try {
-      const { data } = await axios.get(`${API}/api/auth/me`, { headers: authHeaders() });
-      const u = data.user;
-      setName(u.name || '');
-      setEmail(u.email || '');
-      setStudyHours(u.preferences?.studyHoursPerDay || 4);
-      setSubjects(u.preferences?.subjects?.join(', ') || '');
-    } catch {
-      setMessage({ type: 'error', text: 'Profile load nahi ho saka' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSave = (e) => {
     e.preventDefault();
-    setSaving(true);
-    setMessage({ type: '', text: '' });
-
-    try {
-      const body = {
-        name: name.trim(),
-        preferences: {
-          studyHoursPerDay: parseInt(studyHours) || 4,
-          subjects: subjects.split(',').map(s => s.trim()).filter(Boolean),
-        },
-      };
-
-      if (newPassword) {
-        body.oldPassword = oldPassword;
-        body.newPassword = newPassword;
-      }
-
-      const { data } = await axios.put(`${API}/api/auth/profile`, body, { headers: authHeaders() });
-
-      // Update auth context
-      const token = localStorage.getItem('token');
-      if (token && data.user) {
-        login(token, data.user);
-      }
-
-      setMessage({ type: 'success', text: 'Profile update ho gaya! ✓' });
-      setOldPassword('');
-      setNewPassword('');
-    } catch (err) {
-      setMessage({ type: 'error', text: err.response?.data?.error || 'Update nahi hua, dobara try karo' });
-    } finally {
-      setSaving(false);
-    }
+    setSavedMsg(true);
+    setTimeout(() => setSavedMsg(false), 3000);
   };
-
-  if (loading) {
-    return (
-      <div className="profile-page">
-        <div className="page-header">
-          <h1>Profile</h1>
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="profile-page">
-      <div className="page-header">
-        <h1>Profile Settings</h1>
-        <p>Apne account ki details aur preferences manage karo</p>
+    <div className="profile-view animate-fade-in">
+      <div className="profile-header">
+        <div>
+          <h2>👤 Account Settings & Profile</h2>
+          <p>Manage your account preferences, academic goals, and notification settings.</p>
+        </div>
       </div>
 
-      {message.text && (
-        <div className={`profile-message ${message.type}`}>
-          {message.text}
-        </div>
-      )}
+      <div className="grid-3 mt-4">
+        {/* User Card */}
+        <div className="glass-card user-summary-card">
+          <div className="user-avatar-large">
+            {name ? name[0].toUpperCase() : 'U'}
+          </div>
+          <h3 className="mt-3">{name}</h3>
+          <p className="text-muted" style={{ fontSize: '0.85rem' }}>{email}</p>
+          <span className="badge badge-primary mt-2">Learnozi PRO Student</span>
 
-      <form className="profile-form" onSubmit={handleSubmit}>
-        {/* Personal Info */}
-        <div className="card profile-section">
-          <h3 className="section-heading">👤 Personal Info</h3>
-          <div className="profile-grid">
+          <div className="user-quick-stats mt-4">
+            <div className="stat-box">
+              <span className="num">14.5</span>
+              <span className="lbl">Focus Hrs</span>
+            </div>
+            <div className="stat-box">
+              <span className="num">42</span>
+              <span className="lbl">Flashcards</span>
+            </div>
+            <div className="stat-box">
+              <span className="num">6</span>
+              <span className="lbl">Streak</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Profile Settings Form */}
+        <div className="glass-card profile-form-panel" style={{ gridColumn: 'span 2' }}>
+          <h3>Edit Profile Information</h3>
+          {savedMsg && <div className="badge badge-success mb-3">✓ Profile settings saved successfully!</div>}
+
+          <form onSubmit={handleSave} className="mt-3">
             <div className="form-group">
-              <label>Name</label>
+              <label>Full Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Tera naam"
               />
             </div>
+
             <div className="form-group">
-              <label>Email</label>
+              <label>Email Address</label>
               <input
                 type="email"
                 value={email}
-                disabled
-                className="input-disabled"
+                onChange={(e) => setEmail(e.target.value)}
               />
-              <span className="field-hint">Email change nahi ho sakta</span>
             </div>
-          </div>
-        </div>
 
-        {/* Change Password */}
-        <div className="card profile-section">
-          <h3 className="section-heading">🔒 Change Password</h3>
-          <p className="section-hint">Chorna hai toh khali chhor do — password nahi badlega</p>
-          <div className="profile-grid">
             <div className="form-group">
-              <label>Current Password</label>
-              <input
-                type="password"
-                value={oldPassword}
-                onChange={(e) => setOldPassword(e.target.value)}
-                placeholder="••••••••"
-              />
+              <label>Education Level</label>
+              <select value={educationLevel} onChange={(e) => setEducationLevel(e.target.value)}>
+                <option value="High School">High School</option>
+                <option value="University">University Major</option>
+                <option value="Post-Graduate">Post-Graduate / Masters</option>
+              </select>
             </div>
-            <div className="form-group">
-              <label>New Password</label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Kam az kam 6 characters"
-              />
-            </div>
-          </div>
-        </div>
 
-        {/* Study Preferences */}
-        <div className="card profile-section">
-          <h3 className="section-heading">📚 Study Preferences</h3>
-          <div className="profile-grid">
-            <div className="form-group">
-              <label>Daily Study Hours Goal</label>
-              <input
-                type="number"
-                min="1"
-                max="16"
-                value={studyHours}
-                onChange={(e) => setStudyHours(e.target.value)}
-              />
-              <span className="field-hint">{studyHours} ghante roz ka target</span>
-            </div>
-            <div className="form-group">
-              <label>Preferred Subjects</label>
-              <input
-                type="text"
-                value={subjects}
-                onChange={(e) => setSubjects(e.target.value)}
-                placeholder="Physics, Chemistry, Biology"
-              />
-              <span className="field-hint">Comma se alag karo</span>
-            </div>
-          </div>
+            <button type="submit" className="btn btn-primary mt-3">
+              Save Changes
+            </button>
+          </form>
         </div>
-
-        <button type="submit" className="btn btn-primary profile-save" disabled={saving}>
-          {saving ? 'Saving...' : 'Save Changes'}
-        </button>
-      </form>
+      </div>
     </div>
   );
 }

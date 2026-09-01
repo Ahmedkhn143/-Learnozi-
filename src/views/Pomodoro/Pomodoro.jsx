@@ -1,254 +1,136 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from 'react';
 import './Pomodoro.css';
 
-import { API } from '../../config';
-const authHeaders = () => {
-  const t = localStorage.getItem('token');
-  return t ? { Authorization: `Bearer ${t}` } : {};
-};
-
-const MODES = {
-  focus:      { label: 'Focus',       minutes: 25, color: '#4f46e5' },
-  shortBreak: { label: 'Short Break', minutes: 5,  color: '#22c55e' },
-  longBreak:  { label: 'Long Break',  minutes: 15, color: '#8b5cf6' },
-};
-
-const CIRCUMFERENCE = 2 * Math.PI * 108; // radius = 108
-
-function formatTime(seconds) {
-  const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-  const s = (seconds % 60).toString().padStart(2, '0');
-  return `${m}:${s}`;
-}
-
 export default function Pomodoro() {
-  const [mode, setMode]           = useState('focus');
-  const [running, setRunning]     = useState(false);
-  const [seconds, setSeconds]     = useState(MODES.focus.minutes * 60);
-  const [subject, setSubject]     = useState('General');
-  const [sessions, setSessions]   = useState(0); // pomodoros done this sitting
-  const [stats, setStats]         = useState(null);
-  const [history, setHistory]     = useState([]);
-  const [toast, setToast]         = useState('');
-  const intervalRef = useRef(null);
-  const totalRef    = useRef(MODES.focus.minutes * 60);
+  const [mode, setMode] = useState('pomodoro'); // pomodoro (25m), shortBreak (5m), longFocus (50m)
+  const [timeLeft, setTimeLeft] = useState(25 * 60);
+  const [isActive, setIsActive] = useState(false);
+  const [soundscape, setSoundscape] = useState('rain');
+  const [soundPlaying, setSoundPlaying] = useState(false);
+  const [completedSessions, setCompletedSessions] = useState(3);
 
-  // Load stats + history on mount
+  const modeConfig = {
+    pomodoro: { label: 'Pomodoro (25m)', duration: 25 * 60 },
+    shortBreak: { label: 'Short Break (5m)', duration: 5 * 60 },
+    longFocus: { label: 'Deep Focus (50m)', duration: 50 * 60 }
+  };
+
   useEffect(() => {
-    loadStats();
-    loadHistory();
-  }, []);
-
-  const loadStats = async () => {
-    try {
-      const { data } = await axios.get(`${API}/api/focus/stats`, { headers: authHeaders() });
-      setStats(data);
-    } catch { /* silent */ }
-  };
-
-  const loadHistory = async () => {
-    try {
-      const { data } = await axios.get(`${API}/api/focus/history?limit=5`, { headers: authHeaders() });
-      setHistory(data.sessions || []);
-    } catch { /* silent */ }
-  };
-
-  // Change mode
-  const switchMode = (m) => {
-    clearInterval(intervalRef.current);
-    setRunning(false);
-    setMode(m);
-    const secs = MODES[m].minutes * 60;
-    setSeconds(secs);
-    totalRef.current = secs;
-  };
-
-  // Tick
-  useEffect(() => {
-    if (!running) return;
-    intervalRef.current = setInterval(() => {
-      setSeconds((prev) => {
-        if (prev <= 1) {
-          clearInterval(intervalRef.current);
-          setRunning(false);
-          handleComplete();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(intervalRef.current);
-  }, [running, mode]);
-
-  const handleComplete = useCallback(async () => {
-    // Sound — beep via AudioContext
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.frequency.value = 880; gain.gain.value = 0.3;
-      osc.start(); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
-      osc.stop(ctx.currentTime + 0.8);
-    } catch { /* no audio */ }
-
-    if (mode === 'focus') {
-      const dur = MODES.focus.minutes;
-      setSessions((s) => s + 1);
-      showToast('🎉 Focus session complete! Time for a break.');
-      // Save to DB
-      try {
-        await axios.post(
-          `${API}/api/focus`,
-          { subject, durationMin: dur, completed: true },
-          { headers: authHeaders() }
-        );
-        loadStats();
-        loadHistory();
-      } catch { /* silent */ }
-    } else {
-      showToast('⏰ Break over! Ready to focus?');
+    let interval = null;
+    if (isActive && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0 && isActive) {
+      setIsActive(false);
+      setCompletedSessions((prev) => prev + 1);
+      alert('🎉 Focus Session Completed! Take a well-deserved break.');
     }
-  }, [mode, subject]);
+    return () => clearInterval(interval);
+  }, [isActive, timeLeft]);
 
-  const showToast = (msg) => {
-    setToast(msg);
-    setTimeout(() => setToast(''), 4000);
+  const changeMode = (newMode) => {
+    setMode(newMode);
+    setIsActive(false);
+    setTimeLeft(modeConfig[newMode].duration);
   };
 
-  const handleReset = () => {
-    clearInterval(intervalRef.current);
-    setRunning(false);
-    const secs = MODES[mode].minutes * 60;
-    setSeconds(secs);
-    totalRef.current = secs;
+  const toggleTimer = () => setIsActive(!isActive);
+
+  const resetTimer = () => {
+    setIsActive(false);
+    setTimeLeft(modeConfig[mode].duration);
   };
 
-  // SVG progress
-  const progress  = seconds / totalRef.current;
-  const dashOffset = CIRCUMFERENCE * (1 - progress);
-  const color = MODES[mode].color;
-
-  // Format stats
-  const fmtMin = (min) => {
-    if (!min) return '0m';
-    if (min < 60) return `${min}m`;
-    return `${Math.floor(min / 60)}h ${min % 60}m`;
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
+
+  const totalSecs = modeConfig[mode].duration;
+  const progressPercent = ((totalSecs - timeLeft) / totalSecs) * 100;
+  const strokeDashoffset = 565 - (565 * progressPercent) / 100;
 
   return (
-    <div className="pomodoro">
-      {/* Header */}
-      <div className="pomo-header">
-        <h1>⏱️ Focus Timer</h1>
-        <p>Pomodoro technique — 25 min focus, 5 min break</p>
+    <div className="pomodoro-view animate-fade-in">
+      <div className="pomodoro-header text-center">
+        <h2>⏱️ Ambient Focus Room</h2>
+        <p>Eliminate distractions, lock in deep study sessions, and track focus time.</p>
       </div>
 
-      {/* Streak */}
-      {stats?.streak > 0 && (
-        <div className="pomo-streak">
-          🔥 {stats.streak} din ki streak — keep it up!
-        </div>
-      )}
-
-      {/* Mode tabs */}
-      <div className="pomo-modes">
-        {Object.entries(MODES).map(([key, val]) => (
-          <button
-            key={key}
-            className={`pomo-mode-btn${mode === key ? ' active' : ''}`}
-            onClick={() => switchMode(key)}
-          >
-            {val.label}
-          </button>
-        ))}
+      {/* Mode Selector Tabs */}
+      <div className="timer-mode-tabs mt-3">
+        <button className={`mode-tab-btn ${mode === 'pomodoro' ? 'active' : ''}`} onClick={() => changeMode('pomodoro')}>
+          🧠 25m Focus
+        </button>
+        <button className={`mode-tab-btn ${mode === 'shortBreak' ? 'active' : ''}`} onClick={() => changeMode('shortBreak')}>
+          ☕ 5m Break
+        </button>
+        <button className={`mode-tab-btn ${mode === 'longFocus' ? 'active' : ''}`} onClick={() => changeMode('longFocus')}>
+          🚀 50m Deep Work
+        </button>
       </div>
 
-      {/* Circle timer */}
-      <div className="pomo-circle-wrap">
-        <div className="pomo-circle">
-          <svg className="pomo-svg" width="240" height="240" viewBox="0 0 240 240">
-            <circle className="pomo-track" cx="120" cy="120" r="108" />
+      {/* Circular Timer Ring */}
+      <div className="timer-workspace mt-4">
+        <div className="svg-timer-wrap">
+          <svg className="timer-svg" width="220" height="220" viewBox="0 0 200 200">
+            <circle className="timer-bg-circle" cx="100" cy="100" r="90" />
             <circle
-              className="pomo-fill"
-              cx="120" cy="120" r="108"
-              stroke={color}
-              strokeDasharray={CIRCUMFERENCE}
-              strokeDashoffset={dashOffset}
+              className="timer-progress-circle"
+              cx="100"
+              cy="100"
+              r="90"
+              style={{ strokeDasharray: 565, strokeDashoffset }}
             />
           </svg>
-          <div className="pomo-time-text">
-            <div className="pomo-time">{formatTime(seconds)}</div>
-            <div className="pomo-mode-label">{MODES[mode].label}</div>
-            {mode === 'focus' && (
-              <div className="pomo-session-count">Session #{sessions + 1}</div>
-            )}
+
+          <div className="timer-display-content">
+            <span className="time-digits">{formatTime(timeLeft)}</span>
+            <span className="mode-status-text">{isActive ? '⚡ IN FOCUS' : 'PAUSED'}</span>
           </div>
         </div>
-      </div>
 
-      {/* Subject */}
-      <div className="pomo-subject-row">
-        <select value={subject} onChange={(e) => setSubject(e.target.value)} disabled={running}>
-          {['General','Physics','Chemistry','Biology','Mathematics','English','Urdu',
-            'Pakistan Studies','Islamiat','Computer Science'].map((s) => (
-            <option key={s}>{s}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* Controls */}
-      <div className="pomo-controls">
-        <button
-          className={`pomo-btn-main ${running ? 'pause' : 'start'}`}
-          onClick={() => setRunning((r) => !r)}
-        >
-          {running ? '⏸ Pause' : seconds === totalRef.current ? '▶ Start' : '▶ Resume'}
-        </button>
-        <button className="pomo-btn-reset" onClick={handleReset} title="Reset">↺</button>
-      </div>
-
-      {/* Stats */}
-      <div className="pomo-stats">
-        <div className="pomo-stat">
-          <div className="pomo-stat-num">{fmtMin(stats?.todayMinutes)}</div>
-          <div className="pomo-stat-label">Aaj ka focus</div>
+        {/* Timer Control Buttons */}
+        <div className="timer-controls mt-4">
+          <button className={`btn btn-lg ${isActive ? 'btn-secondary' : 'btn-primary'}`} onClick={toggleTimer}>
+            {isActive ? '⏸️ Pause' : '▶️ Start Session'}
+          </button>
+          <button className="btn btn-secondary btn-lg" onClick={resetTimer}>
+            🔄 Reset
+          </button>
         </div>
-        <div className="pomo-stat">
-          <div className="pomo-stat-num">{fmtMin(stats?.weekMinutes)}</div>
-          <div className="pomo-stat-label">Is hafte</div>
-        </div>
-        <div className="pomo-stat">
-          <div className="pomo-stat-num">{stats?.totalSessions ?? 0}</div>
-          <div className="pomo-stat-label">Total sessions</div>
-        </div>
-      </div>
 
-      {/* History */}
-      {history.length > 0 && (
-        <>
-          <div className="pomo-history-title">Recent Sessions</div>
-          <div className="pomo-history-list">
-            {history.map((h) => (
-              <div key={h._id} className="pomo-history-item">
-                <div>
-                  <div className="pomo-history-subject">{h.subject}</div>
-                  <div className="pomo-history-meta">
-                    {new Date(h.completedAt).toLocaleDateString('en-PK', {
-                      day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-                    })}
-                  </div>
-                </div>
-                <span className="pomo-history-duration">{h.durationMin} min</span>
-              </div>
-            ))}
+        {/* Ambient Soundscapes Bar */}
+        <div className="glass-card soundscape-panel mt-4">
+          <div className="soundscape-header">
+            <span>🎧 Ambient Soundscape: <strong>{soundscape.toUpperCase()}</strong></span>
+            <button className="btn btn-ghost btn-sm" onClick={() => setSoundPlaying(!soundPlaying)}>
+              {soundPlaying ? '🔊 Playing' : '🔇 Muted'}
+            </button>
           </div>
-        </>
-      )}
+          <div className="soundscape-options mt-2">
+            <button className={`sound-btn ${soundscape === 'rain' ? 'active' : ''}`} onClick={() => setSoundscape('rain')}>
+              🌧️ Gentle Rain
+            </button>
+            <button className={`sound-btn ${soundscape === 'lofi' ? 'active' : ''}`} onClick={() => setSoundscape('lofi')}>
+              🎧 Lo-Fi Beats
+            </button>
+            <button className={`sound-btn ${soundscape === 'forest' ? 'active' : ''}`} onClick={() => setSoundscape('forest')}>
+              🌲 Pine Forest
+            </button>
+            <button className={`sound-btn ${soundscape === 'cafe' ? 'active' : ''}`} onClick={() => setSoundscape('cafe')}>
+              ☕ Cafe Atmosphere
+            </button>
+          </div>
+        </div>
 
-      {/* Toast */}
-      {toast && <div className="pomo-toast">{toast}</div>}
+        {/* Completed Sessions Stats */}
+        <div className="completed-sessions-badge mt-3">
+          <span>🎉 {completedSessions} Focus Sessions Completed Today ({(completedSessions * 25) / 60} hours logged)</span>
+        </div>
+      </div>
     </div>
   );
 }

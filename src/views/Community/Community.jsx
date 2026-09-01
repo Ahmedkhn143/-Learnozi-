@@ -1,112 +1,135 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useAuth } from '../../context/AuthContext';
-import { useToast } from '../../context/ToastContext';
+import { useState } from 'react';
 import './Community.css';
 
-import { API } from '../../config';
-const authHeaders = () => {
-  const t = localStorage.getItem('token');
-  return t ? { Authorization: `Bearer ${t}` } : {};
-};
-
 export default function Community() {
-  const { user } = useAuth();
-  const { success, error, info } = useToast();
-  
-  const [publicSets, setPublicSets] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [universityFilter, setUniversityFilter] = useState('');
-
-  useEffect(() => {
-    fetchLibrary();
-  }, [search, universityFilter]);
-
-  const fetchLibrary = async () => {
-    try {
-      const params = new URLSearchParams();
-      if (search) params.append('search', search);
-      if (universityFilter) params.append('university', universityFilter);
-
-      const { data } = await axios.get(`${API}/api/flashcards/public/library?${params.toString()}`, { headers: authHeaders() });
-      setPublicSets(Array.isArray(data.sets) ? data.sets : (Array.isArray(data) ? data : []));
-    } catch (err) {
-      setPublicSets([]);
-      error('Failed to fetch community library');
-    } finally {
-      setLoading(false);
+  const [posts, setPosts] = useState([
+    {
+      id: 1,
+      author: 'Ayesha Khan',
+      avatar: 'A',
+      title: 'Top 5 tips for acing Organic Chemistry Reaction Mechanisms!',
+      category: 'Exam Prep',
+      upvotes: 24,
+      comments: 6,
+      time: '3 hours ago',
+      content: 'Make sure to draw mechanism arrows carefully from the nucleophile electron pair to the electrophilic carbon...'
+    },
+    {
+      id: 2,
+      author: 'Muhammad Ali',
+      avatar: 'M',
+      title: 'Looking for a study group partner for Calculus III (Finals Prep)',
+      category: 'Study Group',
+      upvotes: 15,
+      comments: 9,
+      time: '5 hours ago',
+      content: 'Hey everyone! Meeting on Zoom every evening at 8 PM for practice problem sessions. DM if interested!'
     }
+  ]);
+
+  const [showPostModal, setShowPostModal] = useState(false);
+  const [postTitle, setPostTitle] = useState('');
+  const [postContent, setPostContent] = useState('');
+
+  const handleUpvote = (id) => {
+    setPosts(posts.map(p => p.id === id ? { ...p, upvotes: p.upvotes + 1 } : p));
   };
 
-  const cloneSet = async (id, title) => {
-    try {
-      info(`Cloning "${title}" to your account...`);
-      await axios.post(`${API}/api/flashcards/${id}/clone`, {}, { headers: authHeaders() });
-      success(`Successfully cloned! You can find it in your Flashcards space.`);
-    } catch (err) {
-      error(err.response?.data?.error || 'Failed to clone set');
-    }
+  const handleCreatePost = (e) => {
+    e.preventDefault();
+    if (!postTitle.trim()) return;
+
+    const newP = {
+      id: Date.now(),
+      author: 'You',
+      avatar: 'Y',
+      title: postTitle,
+      category: 'Q&A',
+      upvotes: 1,
+      comments: 0,
+      time: 'Just now',
+      content: postContent
+    };
+
+    setPosts([newP, ...posts]);
+    setPostTitle('');
+    setPostContent('');
+    setShowPostModal(false);
   };
 
   return (
-    <div className="community-page">
-      <div className="community-hero card">
-        <h1>Community Library 🌍</h1>
-        <p>Find, clone, and share flashcards with university students across Pakistan.</p>
-        
-        <div className="community-filters">
-          <input 
-            type="text" 
-            placeholder="Search topics (e.g. Newton's laws)..." 
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="search-input"
-          />
-          <input 
-            type="text" 
-            placeholder="Filter by University (e.g. NUST, FAST)..." 
-            value={universityFilter}
-            onChange={(e) => setUniversityFilter(e.target.value)}
-            className="uni-input"
-          />
+    <div className="community-view animate-fade-in">
+      <div className="community-header">
+        <div>
+          <h2>🌍 Peer Study Community</h2>
+          <p>Share study notes, ask exam questions, and collaborate with student groups.</p>
         </div>
+        <button className="btn btn-primary btn-md" onClick={() => setShowPostModal(true)}>
+          + Create Post
+        </button>
       </div>
 
-      <div className="library-grid">
-        {loading ? (
-          <div className="text-center p-xl">Loading library...</div>
-        ) : (!publicSets || publicSets.length === 0) ? (
-          <div className="empty-state card">
-            <h2>No public sets found.</h2>
-            <p>Be the first to share a set in this category!</p>
-          </div>
-        ) : (
-          publicSets.map(set => (
-            <div key={set._id} className="library-card card">
-              <div className="lib-card-header">
-                <h3>{set.title}</h3>
-                {set.isAIGenerated && <span className="ai-badge">🤖 AI Generated</span>}
+      <div className="posts-feed mt-4">
+        {posts.map((post) => (
+          <div key={post.id} className="glass-card post-card">
+            <div className="post-header">
+              <div className="post-author-info">
+                <div className="author-avatar">{post.avatar}</div>
+                <div>
+                  <span className="author-name">{post.author}</span>
+                  <span className="post-time">{post.time}</span>
+                </div>
               </div>
-              <div className="lib-card-meta">
-                <span>📚 {set.subject}</span>
-                <span>🃏 {set.cards.length} cards</span>
-              </div>
-              <div className="lib-card-author">
-                <span className="author-name">👤 {set.user?.name || 'Anonymous Learner'}</span>
-                {set.university && <span className="uni-badge">🏫 {set.university}</span>}
-              </div>
-              <button 
-                className="btn btn-primary clone-btn" 
-                onClick={() => cloneSet(set._id, set.title)}
-                disabled={set.user?._id === user._id}
-              >
-                {set.user?._id === user._id ? 'Your Set' : '📥 Clone to My Account'}
-              </button>
+              <span className="badge badge-cyan">{post.category}</span>
             </div>
-          ))
-        )}
+
+            <h3 className="post-title mt-3">{post.title}</h3>
+            <p className="post-body mt-2">{post.content}</p>
+
+            <div className="post-footer mt-3">
+              <button className="btn-upvote" onClick={() => handleUpvote(post.id)}>
+                🔺 Upvote ({post.upvotes})
+              </button>
+              <span className="comments-count">💬 {post.comments} Comments</span>
+            </div>
+          </div>
+        ))}
       </div>
+
+      {showPostModal && (
+        <div className="modal-overlay" onClick={() => setShowPostModal(false)}>
+          <div className="glass-card modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>Post to Community</h3>
+            <form onSubmit={handleCreatePost} className="mt-3">
+              <div className="form-group">
+                <label>Post Title</label>
+                <input
+                  type="text"
+                  placeholder="Ask a question or share study tips..."
+                  value={postTitle}
+                  onChange={(e) => setPostTitle(e.target.value)}
+                  autoFocus
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Details</label>
+                <textarea
+                  rows="4"
+                  placeholder="Provide context or links..."
+                  value={postContent}
+                  onChange={(e) => setPostContent(e.target.value)}
+                />
+              </div>
+
+              <div className="modal-actions mt-4">
+                <button type="button" className="btn btn-ghost" onClick={() => setShowPostModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary">Publish Post</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

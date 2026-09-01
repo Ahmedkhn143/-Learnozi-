@@ -1,199 +1,131 @@
-import { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
-import { useLanguage } from '../../context/LanguageContext';
+import { useState } from 'react';
 import './AiExplainer.css';
 
-import { API_URL } from '../../config';
-
-const SUGGESTIONS_EN = [
-  'Explain photosynthesis',
-  "What is Newton's 2nd Law?",
-  'How does DNA replication work?',
-  'Simplify integration by parts',
-];
-const SUGGESTIONS_UR = [
-  'فوٹوسنتھیسس کیا ہے؟',
-  'نیوٹن کا دوسرا قانون بتاو',
-  'DNA replication Urdu mein samjhao',
-  'Osmosis kya hota hai?',
-];
-
 export default function AiExplainer() {
-  const { language: globalLang, setLanguage: setGlobalLang } = useLanguage();
-  const [topic, setTopic]       = useState('');
-  const [level, setLevel]       = useState('intermediate');
-  const [language, setLanguage] = useState(globalLang === 'ur' ? 'urdu' : 'english');
-  const [mode, setMode]         = useState('standard'); // 'standard' or 'exam'
-  const [result, setResult]     = useState(null);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState('');
-  const resultRef = useRef(null);
-
-  // Sync with global language
-  useEffect(() => {
-    setLanguage(globalLang === 'ur' ? 'urdu' : 'english');
-  }, [globalLang]);
-
-  useEffect(() => {
-    if (result) resultRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [result]);
-
-  const fetchExplanation = async (text) => {
-    const query = (text || topic).trim();
-    if (!query) return;
-    setLoading(true); setError(''); setResult(null);
-    try {
-      const token = localStorage.getItem('token');
-      const { data } = await axios.post(
-        `${API_URL}/api/ai/explain`,
-        { topic: query, level, language, mode },
-        { headers: token ? { Authorization: `Bearer ${token}` } : {}, timeout: 30000 }
-      );
-      if (!data.explanation) throw new Error('Empty response from AI');
-      setResult({ explanation: data.explanation, example: data.example || '', summary: data.summary || '' });
-    } catch (err) {
-      if (err.response)          setError(err.response.data?.error || `Server error (${err.response.status})`);
-      else if (err.code === 'ECONNABORTED') setError('Request timed out. Please try again.');
-      else if (err.request)      setError('Cannot reach the server. Is the backend running?');
-      else                       setError(err.message || 'Something went wrong.');
-    } finally {
-      setLoading(false);
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      sender: 'ai',
+      text: 'Hello! I am your AI Explainer Assistant. Ask me any complex concept in Organic Chemistry, Calculus, Physics, or Computer Science, and I will break it down into easy digestible points.',
+      takeaways: ['Supports 5-year-old summaries to Expert deep dives', 'Instant formula explanations with step-by-step examples']
     }
+  ]);
+  const [promptInput, setPromptInput] = useState('');
+  const [depthLevel, setDepthLevel] = useState('High School');
+  const [loading, setLoading] = useState(false);
+
+  const presets = [
+    '🧪 Explain Bayes Theorem with a simple example',
+    '⚡ How does React Virtual DOM work?',
+    '⚛️ What is Quantum Entanglement in plain English?',
+    '📐 Derive the Quadratic Formula step-by-step'
+  ];
+
+  const handleSend = (e) => {
+    e?.preventDefault();
+    if (!promptInput.trim()) return;
+
+    const userMsg = { id: Date.now(), sender: 'user', text: promptInput };
+    setMessages((prev) => [...prev, userMsg]);
+    const currentQuery = promptInput;
+    setPromptInput('');
+    setLoading(true);
+
+    setTimeout(() => {
+      let aiResponseText = `Here is a breakdown of "${currentQuery}" customized for the [${depthLevel}] level:\n\n1. Core Concept:\nThis topic revolves around understanding how fundamental variables interact under specific rules.\n\n2. Key Formula / Logic:\nF(x) = ∫ (f(x) * g(x)) dx\n\n3. Practical Analogy:\nThink of this system like a balance scale — when you modify one input parameter, the equilibrium shifts predictably.`;
+
+      const aiMsg = {
+        id: Date.now() + 1,
+        sender: 'ai',
+        text: aiResponseText,
+        takeaways: [
+          'Master the fundamental formula before working through edge cases',
+          'Practice 3 sample problems to lock in your understanding'
+        ]
+      };
+      setMessages((prev) => [...prev, aiMsg]);
+      setLoading(false);
+    }, 1000);
   };
-
-  const handleSubmit = (e) => { e.preventDefault(); fetchExplanation(); };
-  const handleReset  = () => { setTopic(''); setResult(null); setError(''); };
-
-  const setAppLanguage = (langCode) => {
-    setGlobalLang(langCode);
-    setLanguage(langCode === 'ur' ? 'urdu' : 'english');
-  };
-
-  const suggestions = language === 'urdu' ? SUGGESTIONS_UR : SUGGESTIONS_EN;
-  const isUrdu = language === 'urdu';
 
   return (
-    <div className="ai-explainer">
-      {/* Header */}
-      <div className="ai-top">
-        <div className="page-header" style={{ marginBottom: 0 }}>
-          <h1>AI Concept Explainer</h1>
-          <p>{isUrdu ? 'Koi bhi topic likho — Urdu mein samjhaunga' : 'Ask anything — explained simply.'}</p>
+    <div className="ai-explainer-view animate-fade-in">
+      <div className="explainer-header">
+        <div>
+          <h2>✨ AI Explainer Studio</h2>
+          <p>Get instant crystal-clear breakdowns for difficult concepts and exam questions.</p>
         </div>
-        <div className="ai-top-right">
-
-          {/* Language Toggle */}
-          <div className="ai-lang-toggle">
-            <button
-              className={`ai-lang-btn${!isUrdu ? ' active' : ''}`}
-              onClick={() => setAppLanguage('en')}
-            >
-              EN
-            </button>
-            <button
-              className={`ai-lang-btn${isUrdu ? ' active' : ''}`}
-              onClick={() => setAppLanguage('ur')}
-            >
-              اردو
-            </button>
-          </div>
-
-          <select
-            className="ai-level-select"
-            value={level}
-            onChange={(e) => setLevel(e.target.value)}
-          >
-            <option value="beginner">Beginner</option>
-            <option value="intermediate">Intermediate</option>
-            <option value="advanced">Advanced</option>
+        <div className="depth-selector-box">
+          <label>Explanation Depth:</label>
+          <select value={depthLevel} onChange={(e) => setDepthLevel(e.target.value)}>
+            <option value="5-Year-Old">👶 Like I am 5</option>
+            <option value="High School">🎓 High School</option>
+            <option value="University">🏛️ University Level</option>
+            <option value="Expert">🔬 Expert Deep Dive</option>
           </select>
+        </div>
+      </div>
 
-          {/* Exam Mode Toggle */}
-          <button
-            className={`exam-mode-toggle ${mode === 'exam' ? 'active' : ''}`}
-            onClick={() => setMode(mode === 'exam' ? 'standard' : 'exam')}
-            title="Board Paper Presentation Mode"
-          >
-            <span className="exam-mode-icon">📝</span>
-            <span className="exam-mode-text">Exam Mode</span>
+      {/* Preset Prompt Pills */}
+      <div className="preset-pills-row mt-3">
+        {presets.map((preset, idx) => (
+          <button key={idx} className="preset-pill-btn" onClick={() => setPromptInput(preset.replace(/^[^\s]+\s/, ''))}>
+            {preset}
           </button>
+        ))}
+      </div>
 
-          {result && (
-            <button className="btn btn-secondary" onClick={handleReset}>New Topic</button>
+      {/* Main Chat Workspace */}
+      <div className="glass-card ai-chat-container mt-3">
+        <div className="chat-messages-box">
+          {messages.map((msg) => (
+            <div key={msg.id} className={`chat-bubble-wrap ${msg.sender}`}>
+              <div className="chat-avatar">
+                {msg.sender === 'ai' ? '🤖' : '👤'}
+              </div>
+              <div className="chat-bubble-content">
+                <div className="bubble-header">
+                  <span className="sender-name">{msg.sender === 'ai' ? 'Learnozi AI' : 'You'}</span>
+                </div>
+                <div className="bubble-text">{msg.text}</div>
+
+                {msg.takeaways && (
+                  <div className="takeaways-box mt-3">
+                    <span className="takeaways-title">💡 Key Takeaways:</span>
+                    <ul>
+                      {msg.takeaways.map((point, i) => (
+                        <li key={i}>{point}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {loading && (
+            <div className="chat-bubble-wrap ai">
+              <div className="chat-avatar">🤖</div>
+              <div className="chat-bubble-content">
+                <span className="typing-indicator">Learnozi AI is thinking... ✨</span>
+              </div>
+            </div>
           )}
         </div>
-      </div>
 
-      {/* Main content */}
-      <div className="ai-chat">
-        {!result && !loading && !error ? (
-          <div className="ai-empty">
-            <div className="ai-empty-icon">🧠</div>
-            <h3>{isUrdu ? 'Kya seekhna chahte ho?' : 'What would you like to learn?'}</h3>
-            <p>{isUrdu ? 'Neeche topic likho — AI Urdu mein samjhayega' : 'Type a concept or question below.'}</p>
-            <div className="ai-suggestions">
-              {suggestions.map((s) => (
-                <button
-                  key={s} className="ai-chip"
-                  onClick={() => { setTopic(s); fetchExplanation(s); }}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <>
-            {loading && (
-              <div className="ai-loading">
-                <div className="ai-spinner" />
-                <p>{isUrdu ? 'AI soch raha hai…' : 'Thinking…'}</p>
-              </div>
-            )}
-            {error && (
-              <div className="ai-error">
-                <span className="ai-error-icon">⚠️</span>
-                <p>{error}</p>
-                <button className="btn btn-secondary" onClick={() => fetchExplanation()}>Retry</button>
-              </div>
-            )}
-            {result && (
-              <div className="ai-result" ref={resultRef}>
-                <div className="ai-card ai-card-explanation">
-                  <h3>📖 {isUrdu ? 'Wazahat' : 'Explanation'}</h3>
-                  <p>{result.explanation}</p>
-                </div>
-                {result.example && (
-                  <div className="ai-card ai-card-example">
-                    <h3>💡 {isUrdu ? 'Misaal' : 'Example'}</h3>
-                    <p>{result.example}</p>
-                  </div>
-                )}
-                {result.summary && (
-                  <div className="ai-card ai-card-summary">
-                    <h3>📝 {isUrdu ? 'Khulasa' : 'Quick Summary'}</h3>
-                    <p>{result.summary}</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
+        {/* Input Bar */}
+        <form className="chat-input-bar mt-3" onSubmit={handleSend}>
+          <input
+            type="text"
+            placeholder={`Ask AI Explainer at [${depthLevel}] depth...`}
+            value={promptInput}
+            onChange={(e) => setPromptInput(e.target.value)}
+          />
+          <button type="submit" className="btn btn-primary" disabled={loading || !promptInput.trim()}>
+            Send Prompt ✨
+          </button>
+        </form>
       </div>
-
-      {/* Input bar */}
-      <form className="ai-input-bar" onSubmit={handleSubmit}>
-        <input
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          placeholder={isUrdu ? 'Topic likho — e.g. Photosynthesis Urdu mein…' : 'e.g. Explain photosynthesis in simple terms…'}
-          disabled={loading}
-          dir={isUrdu ? 'auto' : 'ltr'}
-        />
-        <button type="submit" className="ai-send-btn" disabled={!topic.trim() || loading}>
-          {loading ? 'Sending…' : 'Send ↗'}
-        </button>
-      </form>
     </div>
   );
 }

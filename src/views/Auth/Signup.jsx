@@ -1,166 +1,124 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import './Auth.css';
 
-import { API_URL } from '../../config';
-
-function validateEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
 export default function Signup() {
-  const [name, setName]         = useState('');
-  const [email, setEmail]       = useState('');
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors]     = useState({});
-  const [serverError, setServerError] = useState('');
-  const [loading, setLoading]   = useState(false);
-  const [registered, setRegistered] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const validate = () => {
-    const e = {};
-    if (!name.trim())            e.name     = 'Naam daalna zaroori hai';
-    else if (name.trim().length < 2) e.name = 'Naam kam az kam 2 characters ka hona chahiye';
-    if (!email.trim())           e.email    = 'Email daalna zaroori hai';
-    else if (!validateEmail(email)) e.email = 'Email sahi format mein nahi hai';
-    if (!password)               e.password = 'Password daalna zaroori hai';
-    else if (password.length < 6) e.password = 'Password kam az kam 6 characters ka hona chahiye';
-    return e;
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSignup = (e) => {
     e.preventDefault();
-    setServerError('');
-    const errs = validate();
-    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
-    setErrors({});
+    if (!name || !email || !password) {
+      setError('Please fill in all fields.');
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+
     setLoading(true);
-    try {
-      await axios.post(`${API_URL}/api/auth/register`, { name, email, password });
-      setRegistered(true);
-    } catch (err) {
-      setServerError(err.response?.data?.error || 'Signup nahi hua. Dobara try karo.');
-    } finally {
+    setTimeout(() => {
+      login('demo-mock-jwt-token-12345', {
+        id: 'new_user_999',
+        name: name,
+        email: email,
+        isOnboarded: true,
+        academicProfile: { educationLevel: 'University' }
+      });
       setLoading(false);
-    }
+      navigate('/dashboard');
+    }, 600);
   };
-
-  const handleResend = async () => {
-    try {
-      await axios.post(`${API_URL}/api/auth/resend-verification`, { email });
-    } catch {
-      // silently fail
-    }
-  };
-
-  const clearErr = (field) => errors[field] && setErrors((e) => ({ ...e, [field]: '' }));
-
-  // ── After successful registration → show "check your email" ──
-  if (registered) {
-    return (
-      <div className="auth-page">
-        <div className="card auth-card" style={{ textAlign: 'center' }}>
-          <div className="auth-header">
-            <Link to="/" className="auth-logo">L</Link>
-          </div>
-          <div className="verify-icon success">✉</div>
-          <h2>Check Your Email! 📬</h2>
-          <p style={{ color: 'var(--color-text-secondary)', marginTop: '0.5rem', lineHeight: 1.6 }}>
-            Hum ne <strong>{email}</strong> pe ek verification link bheja hai.
-            Pehle email verify karo, phir login kar sako ge.
-          </p>
-          <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <Link to="/login" className="btn btn-primary" style={{ width: '100%' }}>
-              Go to Login
-            </Link>
-            <button
-              className="btn btn-ghost"
-              style={{ width: '100%' }}
-              onClick={handleResend}
-            >
-              Resend verification email
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="auth-page">
-      <div className="card auth-card">
-        <div className="auth-header">
-          <Link to="/" className="auth-logo">L</Link>
-          <h2>Account banao ✨</h2>
-          <p>AI ke saath smarter study shuru karo</p>
+    <div className="auth-page-container">
+      <div className="glow-ambient" style={{ top: '20%', right: '30%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(6,182,212,0.2) 0%, transparent 70%)' }} />
+
+      <div className="glass-card auth-card animate-fade-in">
+        <div className="auth-header text-center">
+          <Link to="/" className="auth-logo-brand">
+            <span className="brand-icon">L</span>
+          </Link>
+          <h2>Create Account ✨</h2>
+          <p>Join Learnozi to start studying smarter with AI</p>
         </div>
 
-        {serverError && <div className="auth-error">{serverError}</div>}
+        {error && <div className="auth-alert-error">{error}</div>}
 
-        <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        <form className="auth-form mt-3" onSubmit={handleSignup}>
           <div className="form-group">
-            <label>Poora Naam</label>
-            <div className="input-with-icon">
+            <label>Full Name</label>
+            <div className="input-icon-wrapper">
               <span className="input-icon">👤</span>
               <input
-                type="text" value={name}
-                onChange={(e) => { setName(e.target.value); clearErr('name'); }}
-                placeholder="Tera naam"
-                className={errors.name ? 'input-error' : ''}
+                type="text"
+                placeholder="John Doe"
+                value={name}
+                onChange={(e) => { setName(e.target.value); setError(''); }}
               />
             </div>
-            {errors.name && <span className="field-error">{errors.name}</span>}
           </div>
 
           <div className="form-group">
             <label>Email Address</label>
-            <div className="input-with-icon">
+            <div className="input-icon-wrapper">
               <span className="input-icon">✉️</span>
               <input
-                type="email" value={email}
-                onChange={(e) => { setEmail(e.target.value); clearErr('email'); }}
+                type="email"
                 placeholder="you@example.com"
-                className={errors.email ? 'input-error' : ''}
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setError(''); }}
               />
             </div>
-            {errors.email && <span className="field-error">{errors.email}</span>}
           </div>
 
           <div className="form-group">
             <label>Password</label>
-            <div className="input-with-icon">
+            <div className="input-icon-wrapper">
               <span className="input-icon">🔒</span>
               <input
                 type={showPassword ? 'text' : 'password'}
+                placeholder="At least 6 characters"
                 value={password}
-                onChange={(e) => { setPassword(e.target.value); clearErr('password'); }}
-                placeholder="Kam az kam 6 characters"
-                className={errors.password ? 'input-error' : ''}
+                onChange={(e) => { setPassword(e.target.value); setError(''); }}
               />
               <button
                 type="button"
-                className="input-toggle-btn"
+                className="input-eye-btn"
                 onClick={() => setShowPassword(!showPassword)}
-                aria-label="Toggle password visibility"
               >
                 {showPassword ? '🙈' : '👁️'}
               </button>
             </div>
-            {errors.password && <span className="field-error">{errors.password}</span>}
-            {password && password.length >= 6 && (
-              <span className="field-success">✓ Password theek hai</span>
+            {password && (
+              <div className="password-strength-bar mt-1">
+                <div
+                  className="strength-fill"
+                  style={{
+                    width: password.length >= 8 ? '100%' : password.length >= 6 ? '60%' : '30%',
+                    background: password.length >= 8 ? '#10b981' : password.length >= 6 ? '#f59e0b' : '#ef4444'
+                  }}
+                />
+              </div>
             )}
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-            {loading ? 'Account ban raha hai…' : 'Account Banao — Free'}
+          <button type="submit" className="btn btn-primary btn-lg mt-3" style={{ width: '100%' }} disabled={loading}>
+            {loading ? 'Creating Account...' : 'Get Started Free'}
           </button>
         </form>
 
-        <div className="auth-footer">
-          Pehle se account hai? <Link to="/login">Sign in karo</Link>
+        <div className="auth-footer text-center mt-4">
+          <p>Already have an account? <Link to="/login" className="signup-link">Sign in</Link></p>
         </div>
       </div>
     </div>

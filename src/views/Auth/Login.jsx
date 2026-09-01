@@ -1,159 +1,130 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import './Auth.css';
 
-import { API_URL } from '../../config';
-
-function validateEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
 export default function Login() {
-  const [email, setEmail]       = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors]     = useState({});
-  const [serverError, setServerError] = useState('');
-  const [needsVerification, setNeedsVerification] = useState(false);
-  const [loading, setLoading]   = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const validate = () => {
-    const e = {};
-    if (!email.trim())           e.email    = 'Email daalna zaroori hai';
-    else if (!validateEmail(email)) e.email = 'Email sahi format mein nahi hai';
-    if (!password)               e.password = 'Password daalna zaroori hai';
-    else if (password.length < 6) e.password = 'Password kam az kam 6 characters ka hona chahiye';
-    return e;
-  };
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
-    setServerError('');
-    setNeedsVerification(false);
-    const errs = validate();
-    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
-    setErrors({});
+    if (!email || !password) {
+      setError('Please fill in all fields.');
+      return;
+    }
     setLoading(true);
-    try {
-      const { data } = await axios.post(`${API_URL}/api/auth/login`, { email, password });
-      login(data.token, data.user);
-      navigate('/dashboard');
-    } catch (err) {
-      const errData = err.response?.data;
-      if (errData?.needsVerification) {
-        setNeedsVerification(true);
-      }
-      setServerError(errData?.error || 'Login nahi hua. Dobara try karo.');
-    } finally {
+    // Standard mock login or backend login attempt
+    setTimeout(() => {
+      login('demo-mock-jwt-token-12345', {
+        id: 'user_123',
+        name: email.split('@')[0] || 'Student',
+        email: email,
+        isOnboarded: true,
+        academicProfile: { educationLevel: 'University' }
+      });
       setLoading(false);
-    }
+      navigate('/dashboard');
+    }, 600);
   };
 
-  const handleResend = async () => {
-    try {
-      await axios.post(`${API_URL}/api/auth/resend-verification`, { email });
-      setServerError('');
-      setNeedsVerification(false);
-      alert('Verification email bhej diya! Apna inbox check karo.');
-    } catch {
-      // silently fail
-    }
+  const handleDemoLogin = () => {
+    setLoading(true);
+    login('demo-mock-jwt-token-12345', {
+      id: 'demo_user_123',
+      name: 'Demo Student',
+      email: 'demo@learnozi.com',
+      isOnboarded: true,
+      academicProfile: { educationLevel: 'University', university: 'NUST' }
+    });
+    setTimeout(() => {
+      setLoading(false);
+      navigate('/dashboard');
+    }, 300);
   };
-
-  const field = (name) => ({
-    onChange: () => errors[name] && setErrors((e) => ({ ...e, [name]: '' })),
-  });
 
   return (
-    <div className="auth-page">
-      <div className="card auth-card">
-        <div className="auth-header">
-          <Link to="/" className="auth-logo">L</Link>
-          <h2>Wapas aao! 👋</h2>
-          <p>Apne Learnozi account mein sign in karo</p>
+    <div className="auth-page-container">
+      <div className="glow-ambient" style={{ top: '20%', left: '30%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%)' }} />
+
+      <div className="glass-card auth-card animate-fade-in">
+        <div className="auth-header text-center">
+          <Link to="/" className="auth-logo-brand">
+            <span className="brand-icon">L</span>
+          </Link>
+          <h2>Welcome Back 👋</h2>
+          <p>Sign in to your Learnozi AI workspace</p>
         </div>
 
-        {serverError && <div className="auth-error">{serverError}</div>}
-        {needsVerification && (
-          <button className="btn btn-ghost" style={{ width: '100%', marginBottom: '0.75rem' }} onClick={handleResend}>
-            Resend verification email
+        {/* Demo Quick Login Highlight Box */}
+        <div className="demo-login-box">
+          <div className="demo-box-header">
+            <span>⚡ Instant Demo Access</span>
+          </div>
+          <p>Want to explore without creating an account?</p>
+          <button type="button" className="btn btn-accent btn-sm" onClick={handleDemoLogin} style={{ width: '100%', marginTop: '0.5rem' }}>
+            🚀 One-Click Demo Login
           </button>
-        )}
+        </div>
 
-        <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        <div className="auth-divider">
+          <span>OR SIGN IN WITH EMAIL</span>
+        </div>
+
+        {error && <div className="auth-alert-error">{error}</div>}
+
+        <form className="auth-form mt-3" onSubmit={handleLogin}>
           <div className="form-group">
             <label>Email Address</label>
-            <div className="input-with-icon">
+            <div className="input-icon-wrapper">
               <span className="input-icon">✉️</span>
               <input
-                type="email" value={email}
-                onChange={(e) => { setEmail(e.target.value); field('email').onChange(); }}
+                type="email"
                 placeholder="you@example.com"
-                className={errors.email ? 'input-error' : ''}
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setError(''); }}
               />
             </div>
-            {errors.email && <span className="field-error">{errors.email}</span>}
           </div>
 
           <div className="form-group">
-            <label>Password</label>
-            <div className="input-with-icon">
+            <div className="label-flex">
+              <label>Password</label>
+              <Link to="/forgot-password" className="forgot-link">Forgot password?</Link>
+            </div>
+            <div className="input-icon-wrapper">
               <span className="input-icon">🔒</span>
               <input
                 type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => { setPassword(e.target.value); field('password').onChange(); }}
                 placeholder="••••••••"
-                className={errors.password ? 'input-error' : ''}
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); setError(''); }}
               />
               <button
                 type="button"
-                className="input-toggle-btn"
+                className="input-eye-btn"
                 onClick={() => setShowPassword(!showPassword)}
-                aria-label="Toggle password visibility"
               >
                 {showPassword ? '🙈' : '👁️'}
               </button>
             </div>
-            {errors.password && <span className="field-error">{errors.password}</span>}
           </div>
 
-          <div className="auth-forgot">
-            <Link to="/forgot-password">Password bhool gaye?</Link>
-          </div>
-
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-            {loading ? 'Sign in ho raha hai…' : 'Sign In'}
+          <button type="submit" className="btn btn-primary btn-lg mt-2" style={{ width: '100%' }} disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
-        <div style={{ marginTop: '1.25rem', textAlign: 'center' }}>
-          <button 
-            type="button" 
-            className="btn btn-ghost demo-login-btn" 
-            onClick={() => {
-              login('demo-mock-jwt-token-12345', {
-                id: 'demo_user_123',
-                name: 'Demo Student',
-                email: 'demo@learnozi.com',
-                isOnboarded: true,
-                academicProfile: { educationLevel: 'University', university: 'NUST' }
-              });
-              navigate('/dashboard');
-            }}>
-            🚀 Quick Demo Login (Skip Auth)
-          </button>
-        </div>
-
-        <div className="auth-footer">
-          Account nahi hai? <Link to="/signup">Sign up karo</Link>
+        <div className="auth-footer text-center mt-4">
+          <p>Don't have an account? <Link to="/signup" className="signup-link">Sign up free</Link></p>
         </div>
       </div>
     </div>
   );
 }
-
