@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SOFT 3D CLAYMORPHISM AUTHENTICATION SYSTEM (FULLY RESPONSIVE)
+   ULTRA-RESPONSIVE 3D CLAYMORPHISM AUTH SYSTEM
    ========================================================================== */
 
 /* Outer Page Backdrop */
@@ -9,10 +9,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2.5rem 1.5rem;
+  padding: 1.5rem 1rem;
   background: #0b0f19;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
   font-family: var(--font-body, system-ui, -apple-system, sans-serif);
 }
 
@@ -26,28 +26,28 @@
 }
 
 .clay-ambient.orb-1 {
-  width: 500px;
-  height: 500px;
+  width: 450px;
+  height: 450px;
   top: -100px;
   left: -100px;
-  background: radial-gradient(circle, rgba(216, 180, 254, 0.35) 0%, rgba(243, 232, 255, 0) 70%);
+  background: radial-gradient(circle, rgba(216, 180, 254, 0.3) 0%, rgba(243, 232, 255, 0) 70%);
 }
 
 .clay-ambient.orb-2 {
-  width: 450px;
-  height: 450px;
+  width: 400px;
+  height: 400px;
   bottom: -100px;
   right: -50px;
-  background: radial-gradient(circle, rgba(251, 207, 232, 0.4) 0%, rgba(243, 232, 255, 0) 70%);
+  background: radial-gradient(circle, rgba(251, 207, 232, 0.35) 0%, rgba(243, 232, 255, 0) 70%);
 }
 
 .clay-ambient.orb-3 {
-  width: 350px;
-  height: 350px;
+  width: 300px;
+  height: 300px;
   top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(192, 132, 252, 0.25) 0%, rgba(243, 232, 255, 0) 70%);
+  background: radial-gradient(circle, rgba(192, 132, 252, 0.2) 0%, rgba(243, 232, 255, 0) 70%);
 }
 
 /* 3D Main Outer Card Container */
@@ -55,17 +55,17 @@
   position: relative;
   z-index: 10;
   width: 100%;
-  max-width: 980px;
+  max-width: 920px;
   background: linear-gradient(135deg, #f9f2fc 0%, #f2e4fa 100%);
-  border-radius: 36px;
+  border-radius: 28px;
   border: 1px solid rgba(255, 255, 255, 0.95);
   box-shadow: 
-    0 35px 90px -15px rgba(124, 58, 237, 0.18),
-    0 15px 35px -10px rgba(0, 0, 0, 0.05),
+    0 25px 70px -15px rgba(124, 58, 237, 0.2),
+    0 10px 30px -10px rgba(0, 0, 0, 0.08),
     inset 0 2px 4px rgba(255, 255, 255, 1);
   display: flex;
-  padding: 1.5rem;
-  gap: 1.5rem;
+  padding: 1.25rem;
+  gap: 1.25rem;
   transform-style: preserve-3d;
   will-change: transform;
 }
@@ -73,40 +73,38 @@
 /* Floating Language Switcher Button */
 .auth-lang-switcher-btn {
   position: absolute;
-  top: 1.25rem;
-  right: 1.25rem;
+  top: 1rem;
+  right: 1rem;
   z-index: 25;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(10px);
   border: 1.5px solid #ebdff5;
   border-radius: 9999px;
-  padding: 0.4rem 0.85rem;
+  padding: 0.35rem 0.75rem;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   cursor: pointer;
   box-shadow: 
-    0 6px 16px rgba(124, 58, 237, 0.12),
+    0 4px 14px rgba(124, 58, 237, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 1);
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
 }
 
 .auth-lang-switcher-btn:hover {
   background: #ffffff;
   border-color: #9333ea;
   transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 10px 22px rgba(147, 51, 234, 0.2);
 }
 
 .auth-lang-switcher-btn .lang-flag {
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .auth-lang-switcher-btn .lang-text {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 800;
   color: #6b21a8;
-  letter-spacing: 0.02em;
 }
 
 /* --------------------------------------------------------------------------
@@ -116,162 +114,145 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 1.5rem;
+  padding: 1rem;
   position: relative;
+  justify-content: space-between;
 }
 
 .auth-3d-brand {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
 }
 
 .brand-badge-3d {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 
-    0 8px 20px rgba(168, 85, 247, 0.35),
+    0 6px 16px rgba(168, 85, 247, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
   text-decoration: none;
-  transition: transform 0.25s ease;
-}
-
-.brand-badge-3d:hover {
-  transform: scale(1.06) rotate(3deg);
 }
 
 .brand-letter-icon {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   font-weight: 800;
   color: #ffffff;
   font-family: var(--font-heading, sans-serif);
 }
 
 .brand-name-3d {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 800;
   color: #2e1065;
   letter-spacing: -0.02em;
 }
 
 .auth-3d-welcome-text h2 {
-  font-size: 1.75rem;
+  font-size: 1.55rem;
   font-weight: 800;
   color: #2e1065;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
   line-height: 1.25;
 }
 
 .auth-3d-welcome-text p {
   color: #6b7280;
-  font-size: 0.92rem;
-  line-height: 1.5;
-  max-width: 340px;
+  font-size: 0.86rem;
+  line-height: 1.45;
 }
 
 /* Scene Canvas */
 .auth-3d-scene-container {
   position: relative;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 28px;
+  border-radius: 20px;
   overflow: visible;
 }
 
 .auth-3d-character-img {
   width: 100%;
-  max-width: 420px;
+  max-width: 380px;
   height: auto;
+  max-height: 280px;
   object-fit: cover;
-  border-radius: 24px;
+  border-radius: 20px;
   box-shadow: 
-    0 20px 45px rgba(124, 58, 237, 0.14),
-    0 4px 12px rgba(0, 0, 0, 0.04);
-  transition: transform 0.3s ease;
+    0 15px 35px rgba(124, 58, 237, 0.14),
+    0 4px 10px rgba(0, 0, 0, 0.04);
 }
 
 /* Floating 3D Micro Widgets */
 .floating-3d-badge {
   position: absolute;
   background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.8);
-  border-radius: 16px;
-  padding: 0.6rem 0.9rem;
-  box-shadow: 
-    0 12px 28px rgba(124, 58, 237, 0.15),
-    0 2px 6px rgba(0, 0, 0, 0.04);
+  border-radius: 14px;
+  padding: 0.5rem 0.75rem;
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.12);
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   z-index: 15;
   animation: float3d 4s ease-in-out infinite;
 }
 
 .badge-sticky-note {
-  top: 15px;
-  right: 15px;
+  top: 10px;
+  right: 10px;
 }
 
 .badge-sticky-note .badge-icon {
-  font-size: 1.2rem;
-}
-
-.badge-sticky-note .badge-text {
-  display: flex;
-  flex-direction: column;
+  font-size: 1.1rem;
 }
 
 .badge-sticky-note .badge-text strong {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: #2e1065;
 }
 
 .badge-sticky-note .badge-text span {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: #7c3aed;
   font-weight: 600;
 }
 
 .badge-heart {
-  bottom: 25px;
-  left: 15px;
-  font-size: 0.78rem;
+  bottom: 15px;
+  left: 10px;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #6b21a8;
   animation-delay: 1.5s;
 }
 
 .badge-sparkle {
-  top: 50%;
-  left: -10px;
-  padding: 0.4rem 0.6rem;
-  font-size: 1rem;
-  border-radius: 12px;
+  top: 45%;
+  left: 0px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.9rem;
+  border-radius: 10px;
   animation-delay: 2.5s;
 }
 
 @keyframes float3d {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-8px) rotate(1.5deg);
-  }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
 }
 
 /* --------------------------------------------------------------------------
-   RIGHT PANEL: Elevated White 3D Clay Card Form
+   RIGHT PANEL: Compact Elevated White 3D Clay Card Form
    -------------------------------------------------------------------------- */
 .auth-3d-right-panel {
   flex: 1.05;
@@ -281,11 +262,11 @@
 .auth-3d-form-card {
   width: 100%;
   background: #ffffff;
-  border-radius: 28px;
-  padding: 2.25rem 2.25rem;
+  border-radius: 22px;
+  padding: 1.5rem 1.65rem;
   box-shadow: 
-    0 25px 60px rgba(147, 112, 219, 0.14),
-    0 4px 16px rgba(0, 0, 0, 0.03),
+    0 18px 45px rgba(147, 112, 219, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.02),
     inset 0 1px 0 rgba(255, 255, 255, 1);
   border: 1px solid rgba(243, 232, 255, 0.8);
   display: flex;
@@ -295,76 +276,76 @@
 
 .auth-3d-header {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.85rem;
 }
 
 .auth-3d-title {
-  font-size: 1.65rem;
+  font-size: 1.45rem;
   font-weight: 800;
   color: #1e1b4b;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.25rem;
   letter-spacing: -0.02em;
 }
 
 .auth-3d-subtitle {
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   color: #64748b;
   margin: 0;
 }
 
 /* Error Alert */
 .auth-3d-alert-error {
-  padding: 0.75rem 1rem;
+  padding: 0.6rem 0.85rem;
   background: #fff1f2;
   border: 1px solid #fecdd3;
   color: #e11d48;
-  border-radius: 14px;
-  font-size: 0.84rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
   font-weight: 600;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.85rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 /* Demo Quick Access Box */
 .demo-3d-box {
   background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
   border: 1.5px dashed #c084fc;
-  border-radius: 18px;
-  padding: 1rem;
+  border-radius: 14px;
+  padding: 0.75rem 0.85rem;
   text-align: center;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.85rem;
 }
 
 .demo-3d-badge span {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 800;
   color: #7e22ce;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
 
 .demo-3d-box p {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: #581c87;
-  margin: 0.2rem 0 0.6rem 0;
+  margin: 0.15rem 0 0.45rem 0;
 }
 
 /* Form Controls */
 .auth-3d-form {
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 0.75rem;
 }
 
 .form-3d-group {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.3rem;
 }
 
 .form-3d-label {
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #334155;
 }
@@ -376,19 +357,17 @@
 }
 
 .link-3d-forgot {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #7c3aed;
   text-decoration: none;
-  transition: color 0.2s ease;
 }
 
 .link-3d-forgot:hover {
-  color: #6d28d9;
   text-decoration: underline;
 }
 
-/* Input Fields with Soft Pill 3D Style */
+/* Input Fields */
 .input-3d-wrapper {
   position: relative;
   display: flex;
@@ -397,108 +376,85 @@
 
 .input-3d-icon {
   position: absolute;
-  left: 1rem;
+  left: 0.85rem;
   color: #94a3b8;
   display: flex;
   align-items: center;
   pointer-events: none;
-  transition: color 0.2s ease;
 }
 
 .input-3d-field {
   width: 100%;
-  padding: 0.8rem 1rem 0.8rem 2.75rem;
-  font-size: 0.9rem;
+  padding: 0.65rem 0.85rem 0.65rem 2.4rem;
+  font-size: 0.86rem;
   color: #1e1b4b;
   background: #faf8fc;
   border: 1.5px solid #ebdff5;
-  border-radius: 14px;
+  border-radius: 12px;
   outline: none;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
   transition: all 0.2s ease;
 }
 
-.input-3d-wrapper:focus-within .input-3d-icon {
-  color: #7c3aed;
-}
-
 .input-3d-field:focus {
   background: #ffffff;
   border-color: #9333ea;
-  box-shadow: 
-    0 0 0 4px rgba(147, 51, 234, 0.12),
-    inset 0 1px 2px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.12);
 }
 
 .input-3d-eye-btn {
   position: absolute;
-  right: 0.85rem;
+  right: 0.75rem;
   background: transparent;
   border: none;
   color: #94a3b8;
   cursor: pointer;
   display: flex;
   align-items: center;
-  padding: 0.25rem;
-  border-radius: 8px;
-  transition: color 0.2s ease, transform 0.2s ease;
+  padding: 0.2rem;
 }
 
-.input-3d-eye-btn:hover {
-  color: #7c3aed;
-  transform: scale(1.08);
-}
-
-/* Custom 3D Checkbox */
+/* Custom Checkbox */
 .checkbox-3d-wrapper {
-  margin-top: 0.2rem;
+  margin-top: 0.1rem;
 }
 
 .checkbox-3d-label {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   cursor: pointer;
-  user-select: none;
 }
 
 .checkbox-3d-input {
   position: absolute;
   opacity: 0;
-  cursor: pointer;
-  height: 0;
-  width: 0;
 }
 
 .checkbox-3d-custom {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   background: #faf8fc;
   border: 1.5px solid #ebdff5;
-  border-radius: 6px;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
 .checkbox-3d-input:checked ~ .checkbox-3d-custom {
   background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
   border-color: #7c3aed;
-  box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3);
 }
 
 .checkbox-3d-custom::after {
   content: "";
-  width: 5px;
-  height: 9px;
+  width: 4px;
+  height: 8px;
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg) scale(0);
-  transition: transform 0.2s ease;
-  margin-bottom: 2px;
 }
 
 .checkbox-3d-input:checked ~ .checkbox-3d-custom::after {
@@ -506,7 +462,7 @@
 }
 
 .checkbox-3d-text {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: #64748b;
   font-weight: 500;
 }
@@ -517,60 +473,40 @@
   text-decoration: none;
 }
 
-.checkbox-3d-text a:hover {
-  text-decoration: underline;
-}
-
-/* 3D Pill Buttons System */
+/* 3D Pill Buttons */
 .btn-3d {
   width: 100%;
-  padding: 0.82rem 1.25rem;
-  font-size: 0.92rem;
+  padding: 0.72rem 1rem;
+  font-size: 0.88rem;
   font-weight: 700;
-  border-radius: 14px;
+  border-radius: 12px;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 0.5rem;
+  transition: all 0.2s ease;
 }
 
 .btn-3d-primary {
   background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
   color: #ffffff;
   box-shadow: 
-    0 10px 25px rgba(124, 58, 237, 0.32),
+    0 8px 20px rgba(124, 58, 237, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .btn-3d-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
   transform: translateY(-2px);
-  box-shadow: 
-    0 14px 30px rgba(124, 58, 237, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
-}
-
-.btn-3d-primary:active:not(:disabled) {
-  transform: translateY(1px) scale(0.98);
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+  box-shadow: 0 12px 25px rgba(124, 58, 237, 0.38);
 }
 
 .btn-3d-demo {
   background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
   color: #ffffff;
-  font-size: 0.85rem;
-  padding: 0.65rem 1rem;
-  box-shadow: 
-    0 8px 20px rgba(6, 182, 212, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-}
-
-.btn-3d-demo:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 25px rgba(6, 182, 212, 0.4);
+  font-size: 0.8rem;
+  padding: 0.55rem 0.85rem;
 }
 
 /* Divider */
@@ -578,9 +514,9 @@
   display: flex;
   align-items: center;
   text-align: center;
-  margin: 1.2rem 0;
+  margin: 0.65rem 0;
   color: #94a3b8;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -592,47 +528,39 @@
 }
 
 .auth-3d-divider span {
-  padding: 0 0.85rem;
+  padding: 0 0.65rem;
 }
 
 /* Social Buttons */
 .social-3d-buttons {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 0.5rem;
 }
 
 .btn-3d-social {
   background: #ffffff;
   border: 1.5px solid #ebdff5;
   color: #334155;
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  padding: 0.7rem 1rem;
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 1);
+  padding: 0.6rem 0.85rem;
 }
 
 .btn-3d-social:hover {
   background: #faf8fc;
   border-color: #c084fc;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(147, 51, 234, 0.1);
-}
-
-.social-icon {
-  flex-shrink: 0;
+  transform: translateY(-1px);
 }
 
 /* Footer Link */
 .auth-3d-footer {
   text-align: center;
-  margin-top: 1.25rem;
+  margin-top: 0.75rem;
 }
 
 .auth-3d-footer p {
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   color: #64748b;
   margin: 0;
 }
@@ -641,11 +569,9 @@
   color: #7c3aed;
   font-weight: 700;
   text-decoration: none;
-  transition: color 0.2s ease;
 }
 
 .link-3d-signup:hover {
-  color: #6d28d9;
   text-decoration: underline;
 }
 
@@ -653,11 +579,11 @@
 .password-strength-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.25rem;
 }
 
 .strength-bar-bg {
-  height: 5px;
+  height: 4px;
   background: #f1f5f9;
   border-radius: 4px;
   overflow: hidden;
@@ -666,153 +592,131 @@
 .strength-bar-fill {
   height: 100%;
   transition: width 0.3s ease, background 0.3s ease;
-  border-radius: 4px;
 }
 
 .strength-label {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
 }
 
 /* --------------------------------------------------------------------------
-   URDU / RTL LANGUAGE STYLING ADJUSTMENTS
+   RESPONSIVE BREAKPOINTS (TABLETS, SMARTPHONES & SMALL MOBILES)
    -------------------------------------------------------------------------- */
-[lang="ur"] .auth-3d-title,
-[lang="ur"] .auth-3d-welcome-text h2 {
-  font-family: system-ui, -apple-system, sans-serif;
-  line-height: 1.4;
-}
-
-[lang="ur"] .input-3d-field {
-  padding-left: 2.75rem;
-  padding-right: 1rem;
-}
-
-/* --------------------------------------------------------------------------
-   RESPONSIVE DESIGN (MOBILE, TABLET & SMALL PHONES BREAKPOINTS)
-   -------------------------------------------------------------------------- */
-@media (max-width: 960px) {
+@media (max-width: 860px) {
   .auth-3d-page {
-    padding: 1.5rem 1rem;
+    padding: 1.25rem 0.75rem;
   }
 
   .auth-3d-card-wrapper {
     flex-direction: column;
-    padding: 1.25rem;
-    gap: 1.25rem;
-    max-width: 520px;
-    border-radius: 28px;
+    padding: 1rem;
+    gap: 1rem;
+    max-width: 480px;
+    border-radius: 24px;
+  }
+
+  /* Hide redundant hero text when stacked on top of form header */
+  .auth-3d-welcome-text {
+    display: none;
   }
 
   .auth-3d-left-panel {
-    padding: 0.5rem 0.25rem;
+    padding: 0.25rem;
   }
 
   .auth-3d-brand {
-    margin-bottom: 0.85rem;
-  }
-
-  .auth-3d-welcome-text h2 {
-    font-size: 1.45rem;
-  }
-
-  .auth-3d-welcome-text p {
-    font-size: 0.85rem;
-    max-width: 100%;
+    margin-bottom: 0.5rem;
   }
 
   .auth-3d-scene-container {
-    margin-top: 1rem;
-    max-height: 220px;
-    border-radius: 20px;
+    margin-top: 0.5rem;
+    max-height: 180px;
+    border-radius: 16px;
     overflow: hidden;
   }
 
   .auth-3d-character-img {
-    max-height: 220px;
+    max-height: 180px;
     object-fit: cover;
-    border-radius: 20px;
-  }
-
-  .badge-sparkle {
-    left: 10px;
-  }
-
-  .auth-3d-form-card {
-    padding: 1.5rem 1.25rem;
-    border-radius: 24px;
-  }
-}
-
-@media (max-width: 540px) {
-  .auth-3d-page {
-    padding: 1rem 0.6rem;
-  }
-
-  .auth-3d-card-wrapper {
-    padding: 1rem 0.85rem;
-    gap: 1rem;
-    border-radius: 22px;
-  }
-
-  .auth-lang-switcher-btn {
-    top: 0.85rem;
-    right: 0.85rem;
-    padding: 0.35rem 0.65rem;
-  }
-
-  .auth-lang-switcher-btn .lang-text {
-    font-size: 0.75rem;
-  }
-
-  .auth-3d-title {
-    font-size: 1.35rem;
-  }
-
-  .auth-3d-subtitle {
-    font-size: 0.8rem;
-  }
-
-  .auth-3d-scene-container {
-    display: none; /* Hide decorative image on smartphones so form is front & center without vertical overflow */
-  }
-
-  .auth-3d-form-card {
-    padding: 1.25rem 0.85rem;
-    border-radius: 20px;
-    box-shadow: none;
-    border: none;
-  }
-
-  .input-3d-field {
-    padding: 0.72rem 0.85rem 0.72rem 2.5rem;
-    font-size: 0.85rem;
-    border-radius: 12px;
-  }
-
-  .btn-3d {
-    padding: 0.75rem 1rem;
-    font-size: 0.88rem;
-    border-radius: 12px;
-  }
-
-  .demo-3d-box {
-    padding: 0.85rem 0.65rem;
-    border-radius: 14px;
-  }
-}
-
-@media (max-width: 380px) {
-  .auth-3d-page {
-    padding: 0.5rem 0.25rem;
-  }
-
-  .auth-3d-card-wrapper {
-    padding: 0.75rem 0.5rem;
     border-radius: 16px;
   }
 
+  .badge-sticky-note, .badge-heart, .badge-sparkle {
+    display: none;
+  }
+
   .auth-3d-form-card {
-    padding: 1rem 0.5rem;
+    padding: 1.25rem 1rem;
+    border-radius: 20px;
+  }
+}
+
+@media (max-width: 520px) {
+  .auth-3d-page {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .auth-3d-card-wrapper {
+    padding: 0.85rem 0.65rem;
+    gap: 0.75rem;
+    border-radius: 20px;
+  }
+
+  .auth-3d-scene-container {
+    display: none;
+  }
+
+  .auth-lang-switcher-btn {
+    top: 0.65rem;
+    right: 0.65rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .auth-lang-switcher-btn .lang-text {
+    font-size: 0.72rem;
+  }
+
+  .auth-3d-title {
+    font-size: 1.3rem;
+  }
+
+  .auth-3d-subtitle {
+    font-size: 0.78rem;
+  }
+
+  .auth-3d-form-card {
+    padding: 1.1rem 0.75rem;
+    border-radius: 16px;
+    border: none;
+    box-shadow: none;
+  }
+
+  .input-3d-field {
+    padding: 0.6rem 0.75rem 0.6rem 2.2rem;
+    font-size: 0.82rem;
+  }
+
+  .btn-3d {
+    padding: 0.68rem 0.85rem;
+    font-size: 0.85rem;
+  }
+
+  .demo-3d-box {
+    padding: 0.65rem 0.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .auth-3d-page {
+    padding: 0.25rem;
+  }
+
+  .auth-3d-card-wrapper {
+    padding: 0.5rem 0.35rem;
+    border-radius: 14px;
+  }
+
+  .auth-3d-form-card {
+    padding: 0.85rem 0.35rem;
   }
 }
