@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import './Auth.css';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, demoLogin } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -13,37 +13,30 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError('Please fill in all fields.');
+    setError('');
+
+    if (!email.trim() || !password.trim()) {
+      setError('Please fill in both Email Address and Password.');
       return;
     }
+
     setLoading(true);
-    // Standard mock login or backend login attempt
-    setTimeout(() => {
-      login('demo-mock-jwt-token-12345', {
-        id: 'user_123',
-        name: email.split('@')[0] || 'Student',
-        email: email,
-        isOnboarded: true,
-        academicProfile: { educationLevel: 'University' }
-      });
+    try {
+      await login(email, password);
       setLoading(false);
       navigate('/dashboard');
-    }, 600);
+    } catch (err) {
+      setError(err.message || 'Invalid email or password.');
+      setLoading(false);
+    }
   };
 
-  const handleDemoLogin = () => {
+  const handleDemoAccess = () => {
     setLoading(true);
-    login('demo-mock-jwt-token-12345', {
-      id: 'demo_user_123',
-      name: 'Demo Student',
-      email: 'demo@learnozi.com',
-      isOnboarded: true,
-      academicProfile: { educationLevel: 'University', university: 'NUST' }
-    });
     setTimeout(() => {
+      demoLogin();
       setLoading(false);
       navigate('/dashboard');
     }, 300);
@@ -51,35 +44,47 @@ export default function Login() {
 
   return (
     <div className="auth-page-container">
-      <div className="glow-ambient" style={{ top: '20%', left: '30%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%)' }} />
+      {/* Background Ambient Glows */}
+      <div className="glow-ambient glow-purple" style={{ top: '15%', left: '25%', width: '450px', height: '450px', background: 'radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%)' }} />
+      <div className="glow-ambient glow-cyan" style={{ bottom: '15%', right: '25%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(6,182,212,0.2) 0%, transparent 70%)' }} />
 
       <div className="glass-card auth-card animate-fade-in">
         <div className="auth-header text-center">
-          <Link to="/" className="auth-logo-brand">
+          <Link to="/" className="auth-logo-brand" title="Go to Home">
             <span className="brand-icon">L</span>
           </Link>
           <h2>Welcome Back 👋</h2>
-          <p>Sign in to your Learnozi AI workspace</p>
+          <p>Sign in to your Learnozi AI study workspace</p>
         </div>
 
-        {/* Demo Quick Login Highlight Box */}
+        {/* Demo One-Click Access Box */}
         <div className="demo-login-box">
           <div className="demo-box-header">
-            <span>⚡ Instant Demo Access</span>
+            <span>⚡ INSTANT DEMO ACCESS</span>
           </div>
-          <p>Want to explore without creating an account?</p>
-          <button type="button" className="btn btn-accent btn-sm" onClick={handleDemoLogin} style={{ width: '100%', marginTop: '0.5rem' }}>
+          <p>Explore all features without typing credentials!</p>
+          <button
+            type="button"
+            className="btn btn-accent btn-sm mt-2"
+            onClick={handleDemoAccess}
+            style={{ width: '100%' }}
+            disabled={loading}
+          >
             🚀 One-Click Demo Login
           </button>
         </div>
 
         <div className="auth-divider">
-          <span>OR SIGN IN WITH EMAIL</span>
+          <span>OR LOGIN WITH YOUR EMAIL</span>
         </div>
 
-        {error && <div className="auth-alert-error">{error}</div>}
+        {error && (
+          <div className="auth-alert-error">
+            <span>⚠️ {error}</span>
+          </div>
+        )}
 
-        <form className="auth-form mt-3" onSubmit={handleLogin}>
+        <form className="auth-form mt-3" onSubmit={handleLogin} noValidate>
           <div className="form-group">
             <label>Email Address</label>
             <div className="input-icon-wrapper">
@@ -89,6 +94,7 @@ export default function Login() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setError(''); }}
+                required
               />
             </div>
           </div>
@@ -105,24 +111,31 @@ export default function Login() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); setError(''); }}
+                required
               />
               <button
                 type="button"
                 className="input-eye-btn"
                 onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? 'Hide Password' : 'Show Password'}
               >
                 {showPassword ? '🙈' : '👁️'}
               </button>
             </div>
           </div>
 
-          <button type="submit" className="btn btn-primary btn-lg mt-2" style={{ width: '100%' }} disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
+          <button
+            type="submit"
+            className="btn btn-primary btn-lg mt-3"
+            style={{ width: '100%' }}
+            disabled={loading}
+          >
+            {loading ? 'Authenticating...' : 'Sign In to Account →'}
           </button>
         </form>
 
         <div className="auth-footer text-center mt-4">
-          <p>Don't have an account? <Link to="/signup" className="signup-link">Sign up free</Link></p>
+          <p>Don't have an account yet? <Link to="/signup" className="signup-link">Sign up free</Link></p>
         </div>
       </div>
     </div>

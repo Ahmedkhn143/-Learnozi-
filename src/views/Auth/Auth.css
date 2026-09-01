@@ -1,10 +1,10 @@
-/* Auth Pages Styles */
+/* Auth Pages Glassmorphism & Responsive Styles */
 .auth-page-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 2rem 1rem;
   background: #0b0f19;
   position: relative;
   overflow: hidden;
@@ -14,10 +14,12 @@
   width: 100%;
   max-width: 440px;
   padding: 2.5rem 2rem;
-  background: rgba(30, 41, 59, 0.7);
+  background: rgba(30, 41, 59, 0.75);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
   position: relative;
   z-index: 10;
 }
@@ -27,28 +29,34 @@
 }
 
 .auth-logo-brand {
-  width: 50px;
-  height: 50px;
-  border-radius: 14px;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
   background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 1rem auto;
-  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 6px 25px rgba(99, 102, 241, 0.45);
   text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.auth-logo-brand:hover {
+  transform: scale(1.05);
 }
 
 .auth-logo-brand .brand-icon {
   font-family: var(--font-heading);
-  font-size: 1.6rem;
+  font-size: 1.75rem;
   font-weight: 800;
   color: #ffffff;
 }
 
 .auth-header h2 {
-  font-size: 1.6rem;
-  margin-bottom: 0.25rem;
+  font-size: 1.65rem;
+  margin-bottom: 0.35rem;
+  color: #ffffff;
 }
 
 .auth-header p {
@@ -56,21 +64,22 @@
   font-size: 0.88rem;
 }
 
-/* Demo Box */
+/* Demo Quick Access Box */
 .demo-login-box {
   padding: 1rem;
-  background: rgba(6, 182, 212, 0.1);
-  border: 1px solid rgba(6, 182, 212, 0.3);
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.12) 0%, rgba(99, 102, 241, 0.08) 100%);
+  border: 1px solid rgba(6, 182, 212, 0.35);
   border-radius: var(--radius-sm);
   margin-bottom: 1.5rem;
   text-align: center;
 }
 
 .demo-box-header {
-  font-size: 0.825rem;
-  font-weight: 700;
+  font-size: 0.78rem;
+  font-weight: 800;
   color: #67e8f9;
-  margin-bottom: 0.25rem;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.2rem;
 }
 
 .demo-login-box p {
@@ -85,9 +94,9 @@
   text-align: center;
   margin: 1.25rem 0;
   color: #475569;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 .auth-divider::before,
@@ -101,18 +110,19 @@
   padding: 0 0.75rem;
 }
 
+/* Error Alert */
 .auth-alert-error {
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
   background: rgba(244, 63, 94, 0.15);
-  border: 1px solid rgba(244, 63, 94, 0.3);
+  border: 1px solid rgba(244, 63, 94, 0.35);
   color: #fca5a5;
   border-radius: var(--radius-sm);
   font-size: 0.85rem;
-  margin-bottom: 1rem;
-  text-align: center;
+  font-weight: 500;
+  margin-bottom: 1.25rem;
 }
 
-/* Form Controls */
+/* Form Inputs with Icons */
 .input-icon-wrapper {
   position: relative;
   display: flex;
@@ -137,7 +147,13 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.05rem;
+  padding: 0.2rem;
+  transition: transform 0.2s ease;
+}
+
+.input-eye-btn:hover {
+  transform: scale(1.1);
 }
 
 .label-flex {
@@ -150,19 +166,35 @@
   font-size: 0.8rem;
   color: var(--color-accent-cyan);
   font-weight: 600;
-
+  text-decoration: none;
 }
 
-.password-strength-bar {
+.forgot-link:hover, .signup-link:hover {
+  text-decoration: underline;
+}
+
+/* Password Strength Bar */
+.password-strength-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.strength-bar-bg {
   height: 4px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
   overflow: hidden;
 }
 
-.strength-fill {
+.strength-bar-fill {
   height: 100%;
   transition: width 0.3s ease, background 0.3s ease;
+}
+
+.strength-label {
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .auth-footer p {

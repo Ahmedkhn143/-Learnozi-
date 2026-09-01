@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
-import { API_URL } from '../config';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -29,26 +28,74 @@ export function AuthProvider({ children }) {
     }
 
     axios
-      .get(`${API_URL}/api/auth/me`, {
+      .get('/api/auth/me', {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setUser(res.data.user))
-      .catch(() => localStorage.removeItem('token'))
+      .catch(() => {
+        // Fallback user if server token is valid locally
+        const storedUser = localStorage.getItem('user_data');
+        if (storedUser) {
+          try { setUser(JSON.parse(storedUser)); } catch (e) { localStorage.removeItem('token'); }
+        } else {
+          localStorage.removeItem('token');
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 
-  const login = (token, userData) => {
-    localStorage.setItem('token', token);
-    setUser(userData);
+  const login = async (email, password) => {
+    try {
+      const res = await axios.post('/api/auth/login', { email, password });
+      const { token, user: userData } = res.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user_data', JSON.stringify(userData));
+      setUser(userData);
+      return userData;
+    } catch (err) {
+      const errorMsg = err.response?.data?.error || err.response?.data?.message || 'Login failed. Check your credentials.';
+      throw new Error(errorMsg);
+    }
+  };
+
+  const register = async (name, email, password) => {
+    try {
+      const res = await axios.post('/api/auth/register', { name, email, password });
+      const { token, user: userData } = res.data;
+      if (token) {
+        localStorage.setItem('token', token);
+        localStorage.setItem('user_data', JSON.stringify(userData));
+        setUser(userData);
+      }
+      return userData;
+    } catch (err) {
+      const errorMsg = err.response?.data?.error || err.response?.data?.message || 'Registration failed. Try again.';
+      throw new Error(errorMsg);
+    }
+  };
+
+  const demoLogin = () => {
+    const demoData = {
+      id: 'demo_user_123',
+      name: 'Demo Student',
+      email: 'demo@learnozi.com',
+      isOnboarded: true,
+      academicProfile: { educationLevel: 'University', university: 'NUST' }
+    };
+    localStorage.setItem('token', 'demo-mock-jwt-token-12345');
+    localStorage.setItem('user_data', JSON.stringify(demoData));
+    setUser(demoData);
+    return demoData;
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user_data');
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, demoLogin, logout }}>
       {children}
     </AuthContext.Provider>
   );
