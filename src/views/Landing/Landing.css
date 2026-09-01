@@ -1,5 +1,5 @@
 /* ===== Landing Page ===== */
-.landing { font-family: 'DM Sans', system-ui, sans-serif; color: #0f172a; }
+.landing { font-family: 'DM Sans', system-ui, sans-serif; color: #0f172a; background: #ffffff; min-height: 100vh; }
 
 /* NAV */
 .ln-nav {

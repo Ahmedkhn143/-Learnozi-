@@ -1,5 +1,5 @@
 /* ==========================================================================
-   SOFT 3D CLAYMORPHISM AUTHENTICATION SYSTEM (BLOONLY STYLE + LEARNOZI BRAND)
+   SOFT 3D CLAYMORPHISM AUTHENTICATION SYSTEM (FULLY RESPONSIVE)
    ========================================================================== */
 
 /* Outer Page Backdrop */
@@ -30,7 +30,7 @@
   height: 500px;
   top: -100px;
   left: -100px;
-  background: radial-gradient(circle, rgba(216, 180, 254, 0.5) 0%, rgba(243, 232, 255, 0) 70%);
+  background: radial-gradient(circle, rgba(216, 180, 254, 0.35) 0%, rgba(243, 232, 255, 0) 70%);
 }
 
 .clay-ambient.orb-2 {
@@ -38,7 +38,7 @@
   height: 450px;
   bottom: -100px;
   right: -50px;
-  background: radial-gradient(circle, rgba(251, 207, 232, 0.6) 0%, rgba(243, 232, 255, 0) 70%);
+  background: radial-gradient(circle, rgba(251, 207, 232, 0.4) 0%, rgba(243, 232, 255, 0) 70%);
 }
 
 .clay-ambient.orb-3 {
@@ -47,7 +47,7 @@
   top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(192, 132, 252, 0.3) 0%, rgba(243, 232, 255, 0) 70%);
+  background: radial-gradient(circle, rgba(192, 132, 252, 0.25) 0%, rgba(243, 232, 255, 0) 70%);
 }
 
 /* 3D Main Outer Card Container */
@@ -689,30 +689,130 @@
 }
 
 /* --------------------------------------------------------------------------
-   RESPONSIVE DESIGN (MOBILE & TABLET COLLAPSE)
+   RESPONSIVE DESIGN (MOBILE, TABLET & SMALL PHONES BREAKPOINTS)
    -------------------------------------------------------------------------- */
-@media (max-width: 900px) {
+@media (max-width: 960px) {
+  .auth-3d-page {
+    padding: 1.5rem 1rem;
+  }
+
   .auth-3d-card-wrapper {
     flex-direction: column;
-    padding: 1rem;
-    max-width: 480px;
+    padding: 1.25rem;
+    gap: 1.25rem;
+    max-width: 520px;
     border-radius: 28px;
   }
 
   .auth-3d-left-panel {
-    padding: 1rem 0.5rem 0.5rem 0.5rem;
+    padding: 0.5rem 0.25rem;
   }
 
-  .auth-3d-scene-container {
-    display: none;
+  .auth-3d-brand {
+    margin-bottom: 0.85rem;
+  }
+
+  .auth-3d-welcome-text h2 {
+    font-size: 1.45rem;
   }
 
   .auth-3d-welcome-text p {
+    font-size: 0.85rem;
     max-width: 100%;
   }
 
+  .auth-3d-scene-container {
+    margin-top: 1rem;
+    max-height: 220px;
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .auth-3d-character-img {
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 20px;
+  }
+
+  .badge-sparkle {
+    left: 10px;
+  }
+
   .auth-3d-form-card {
-    padding: 1.5rem;
+    padding: 1.5rem 1.25rem;
+    border-radius: 24px;
+  }
+}
+
+@media (max-width: 540px) {
+  .auth-3d-page {
+    padding: 1rem 0.6rem;
+  }
+
+  .auth-3d-card-wrapper {
+    padding: 1rem 0.85rem;
+    gap: 1rem;
     border-radius: 22px;
+  }
+
+  .auth-lang-switcher-btn {
+    top: 0.85rem;
+    right: 0.85rem;
+    padding: 0.35rem 0.65rem;
+  }
+
+  .auth-lang-switcher-btn .lang-text {
+    font-size: 0.75rem;
+  }
+
+  .auth-3d-title {
+    font-size: 1.35rem;
+  }
+
+  .auth-3d-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .auth-3d-scene-container {
+    display: none; /* Hide decorative image on smartphones so form is front & center without vertical overflow */
+  }
+
+  .auth-3d-form-card {
+    padding: 1.25rem 0.85rem;
+    border-radius: 20px;
+    box-shadow: none;
+    border: none;
+  }
+
+  .input-3d-field {
+    padding: 0.72rem 0.85rem 0.72rem 2.5rem;
+    font-size: 0.85rem;
+    border-radius: 12px;
+  }
+
+  .btn-3d {
+    padding: 0.75rem 1rem;
+    font-size: 0.88rem;
+    border-radius: 12px;
+  }
+
+  .demo-3d-box {
+    padding: 0.85rem 0.65rem;
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 380px) {
+  .auth-3d-page {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .auth-3d-card-wrapper {
+    padding: 0.75rem 0.5rem;
+    border-radius: 16px;
+  }
+
+  .auth-3d-form-card {
+    padding: 1rem 0.5rem;
   }
 }
